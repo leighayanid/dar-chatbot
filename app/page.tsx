@@ -30,9 +30,17 @@ import {
   Trash2Icon,
   XIcon,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import {
+  createConversation,
+  createMessage,
+  getAllMessages,
+  deleteConversation,
+  getConversations,
+} from "@/lib/supabase";
 
 const STORAGE_KEY = "dar-chat-messages";
+const CONVERSATION_ID_KEY = "dar-conversation-id";
 const THEME_KEY = "dar-theme";
 
 type ViewMode = "chat" | "summary";
@@ -190,7 +198,36 @@ function groupMessagesByMonth(messages: any[]) {
 }
 
 export default function Home() {
-  const { messages, sendMessage, status, setMessages } = useChat();
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const conversationIdRef = useRef<string | null>(null);
+
+  const { messages, sendMessage: baseSendMessage, status, setMessages } = useChat();
+
+  // Wrapper to inject conversationId into API calls
+  const sendMessage = useCallback((message: { text: string }) => {
+    if (conversationIdRef.current) {
+      // Temporarily intercept fetch to add conversationId
+      const originalFetch = window.fetch;
+      window.fetch = async (input, init) => {
+        if (typeof input === 'string' && input.includes('/api/chat') && init?.body) {
+          try {
+            const body = JSON.parse(init.body as string);
+            body.conversationId = conversationIdRef.current;
+            init.body = JSON.stringify(body);
+          } catch (e) {
+            console.error('Failed to parse body:', e);
+          }
+        }
+        const result = await originalFetch(input, init);
+        // Restore original fetch
+        window.fetch = originalFetch;
+        return result;
+      };
+    }
+    return baseSendMessage(message);
+  }, [baseSendMessage]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [viewMode, setViewMode] = useState<ViewMode>("chat");
@@ -226,19 +263,62 @@ export default function Home() {
     }
   }, []);
 
-  // Load messages from localStorage on mount
+  // Load conversation and messages from database on mount
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
+    async function loadData() {
+      setIsLoading(true);
       try {
-        const parsedMessages = JSON.parse(stored);
-        if (parsedMessages.length > 0) {
-          setMessages(parsedMessages);
+        // Get or create conversation
+        let convId = localStorage.getItem(CONVERSATION_ID_KEY);
+
+        if (!convId) {
+          // Create a new conversation
+          const newConv = await createConversation("Daily Report");
+          if (newConv) {
+            convId = newConv.id;
+            localStorage.setItem(CONVERSATION_ID_KEY, convId);
+          }
+        }
+
+        if (convId) {
+          setConversationId(convId);
+          conversationIdRef.current = convId;
+
+          // Load messages from database
+          const dbMessages = await getAllMessages();
+
+          if (dbMessages.length > 0) {
+            // Convert database messages to AI SDK format
+            const formattedMessages = dbMessages.map((msg) => ({
+              id: msg.id,
+              role: msg.role,
+              parts: [{ type: "text" as const, text: msg.content }],
+              createdAt: new Date(msg.created_at),
+            }));
+            setMessages(formattedMessages);
+          }
         }
       } catch (error) {
-        console.error("Failed to load messages from localStorage:", error);
+        console.error("Failed to load messages from database:", error);
+
+        // Fallback to localStorage if database fails
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          try {
+            const parsedMessages = JSON.parse(stored);
+            if (parsedMessages.length > 0) {
+              setMessages(parsedMessages);
+            }
+          } catch (error) {
+            console.error("Failed to load messages from localStorage:", error);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     }
+
+    loadData();
   }, [setMessages]);
 
   // Save messages to localStorage whenever they change
@@ -249,7 +329,20 @@ export default function Home() {
   }, [messages]);
 
   // Clear chat function
-  const clearChat = () => {
+  const clearChat = async () => {
+    if (conversationId) {
+      await deleteConversation(conversationId);
+      localStorage.removeItem(CONVERSATION_ID_KEY);
+
+      // Create new conversation
+      const newConv = await createConversation("Daily Report");
+      if (newConv) {
+        setConversationId(newConv.id);
+        conversationIdRef.current = newConv.id;
+        localStorage.setItem(CONVERSATION_ID_KEY, newConv.id);
+      }
+    }
+
     setMessages([]);
     localStorage.removeItem(STORAGE_KEY);
   };
@@ -406,7 +499,21 @@ export default function Home() {
         {viewMode === "chat" ? (
           <Conversation className="flex-1">
           <ConversationContent>
-            {messages.length === 0 ? (
+            {isLoading ? (
+              <div className="flex h-full items-center justify-center p-8">
+                <div className="text-center">
+                  <div className="mb-6 inline-flex rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 p-6 shadow-lg dark:from-blue-950/50 dark:to-indigo-950/50">
+                    <div className="size-16 animate-pulse rounded-full bg-blue-600 dark:bg-blue-400" />
+                  </div>
+                  <h2 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                    Loading your messages...
+                  </h2>
+                  <p className="text-base text-zinc-600 dark:text-zinc-400">
+                    Please wait while we fetch your conversation
+                  </p>
+                </div>
+              </div>
+            ) : messages.length === 0 ? (
               <div className="flex h-full items-center justify-center p-8">
                 <div className="text-center">
                   <div className="mb-6 inline-flex rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 p-6 shadow-lg dark:from-blue-950/50 dark:to-indigo-950/50">
