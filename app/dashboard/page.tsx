@@ -954,6 +954,60 @@ export default function Home() {
           </ConversationContent>
           <ConversationScrollButton />
         </Conversation>
+
+        {/* Input Area */}
+        <div className="border-t border-zinc-200/60 bg-white/80 backdrop-blur-xl p-5 dark:border-zinc-800/60 dark:bg-zinc-900/80">
+          <div className="rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100 p-1 shadow-lg dark:from-zinc-800 dark:to-zinc-900">
+            <PromptInput
+              onSubmit={(message, event) => {
+                event.preventDefault();
+                if (inputValue.trim()) {
+                  sendMessage({ text: inputValue });
+                  setInputValue('');
+                  resetTranscript();
+                }
+              }}
+            >
+              <PromptInputBody>
+                <PromptInputTextarea
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder="What did you accomplish today? (Cmd/Ctrl+K to focus, Cmd/Ctrl+Enter to send)"
+                  className="min-h-[60px] resize-none rounded-xl border-0 bg-white px-4 py-3 text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
+                />
+              </PromptInputBody>
+              <PromptInputFooter className="flex items-center justify-between px-3 pb-2">
+                <div className="flex items-center gap-2">
+                  <PromptInputTools />
+                  {isSupported && (
+                    <button
+                      type="button"
+                      onClick={toggleVoiceRecording}
+                      className={`rounded-lg p-2 transition-all hover:scale-105 active:scale-95 ${
+                        isListening
+                          ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                          : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600'
+                      }`}
+                      title={isListening ? 'Stop recording' : 'Start voice input'}
+                    >
+                      {isListening ? (
+                        <MicOffIcon className="size-4 animate-pulse" />
+                      ) : (
+                        <MicIcon className="size-4" />
+                      )}
+                    </button>
+                  )}
+                </div>
+                <PromptInputSubmit
+                  status={status}
+                  className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                />
+              </PromptInputFooter>
+            </PromptInput>
+          </div>
+        </div>
+        </>
         ) : (
           /* Summary View */
           <div className="flex-1 overflow-y-auto p-6">
@@ -1025,61 +1079,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-        )}
-
-        {viewMode === "chat" && (
-            <div className="border-t border-zinc-200/60 bg-white/80 backdrop-blur-xl p-5 dark:border-zinc-800/60 dark:bg-zinc-900/80">
-              <div className="rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100 p-1 shadow-lg dark:from-zinc-800 dark:to-zinc-900">
-                <PromptInput
-                  onSubmit={(message, event) => {
-                    event.preventDefault();
-                    if (inputValue.trim()) {
-                      sendMessage({ text: inputValue });
-                      setInputValue('');
-                      resetTranscript();
-                    }
-                  }}
-                >
-                  <PromptInputBody>
-                    <PromptInputTextarea
-                      ref={inputRef}
-                      value={inputValue}
-                      onChange={(e) => setInputValue(e.target.value)}
-                      placeholder="What did you accomplish today? (Cmd/Ctrl+K to focus, Cmd/Ctrl+Enter to send)"
-                      className="min-h-[60px] resize-none rounded-xl border-0 bg-white px-4 py-3 text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
-                    />
-                  </PromptInputBody>
-                  <PromptInputFooter className="flex items-center justify-between px-3 pb-2">
-                    <div className="flex items-center gap-2">
-                      <PromptInputTools />
-                      {isSupported && (
-                        <button
-                          type="button"
-                          onClick={toggleVoiceRecording}
-                          className={`rounded-lg p-2 transition-all hover:scale-105 active:scale-95 ${
-                            isListening
-                              ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                              : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600'
-                          }`}
-                          title={isListening ? 'Stop recording' : 'Start voice input'}
-                        >
-                          {isListening ? (
-                            <MicOffIcon className="size-4 animate-pulse" />
-                          ) : (
-                            <MicIcon className="size-4" />
-                          )}
-                        </button>
-                      )}
-                    </div>
-                    <PromptInputSubmit
-                      status={status}
-                      className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
-                    />
-                  </PromptInputFooter>
-                </PromptInput>
-              </div>
-            </div>
-          </>
         )}
           </div>
         </div>
