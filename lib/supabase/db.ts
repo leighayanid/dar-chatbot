@@ -5,12 +5,16 @@ import type { Conversation, Message } from './types'
 // Conversation operations
 export async function createConversation(title?: string): Promise<Conversation | null> {
   // Get current user
+  console.log('createConversation: Getting user...');
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    console.error('User not authenticated')
+    console.error('createConversation: User not authenticated')
     return null
   }
+
+  console.log('createConversation: User authenticated:', user.id);
+  console.log('createConversation: Creating conversation with title:', title);
 
   const { data, error } = await supabase
     .from('conversations')
@@ -23,10 +27,12 @@ export async function createConversation(title?: string): Promise<Conversation |
     .single()
 
   if (error) {
-    console.error('Error creating conversation:', error)
+    console.error('createConversation: Error creating conversation:', error)
+    console.error('createConversation: Error details:', JSON.stringify(error, null, 2))
     return null
   }
 
+  console.log('createConversation: Conversation created successfully:', data.id);
   return data as Conversation
 }
 

@@ -31,8 +31,10 @@ import {
   XIcon,
   LogOutIcon,
   UserIcon,
+  FileDownIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import {
   createConversation,
   createMessage,
@@ -205,12 +207,27 @@ export default function Home() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const conversationIdRef = useRef<string | null>(null);
+  const router = useRouter();
 
-  const { messages, sendMessage: baseSendMessage, status, setMessages } = useChat();
+  const { messages, sendMessage: originalSendMessage, status, setMessages } = useChat();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, authLoading, router]);
 
   // Wrapper to inject conversationId into API calls
-  const sendMessage = useCallback((message: { text: string }) => {
-    if (conversationIdRef.current) {
+  const sendMessage = useCallback(
+    (message: { text: string }) => {
+      if (!conversationIdRef.current) {
+        console.warn('No conversation ID available');
+        return;
+      }
+
+      console.log('Sending message with conversationId:', conversationIdRef.current);
+
       // Temporarily intercept fetch to add conversationId
       const originalFetch = window.fetch;
       window.fetch = async (input, init) => {
@@ -219,23 +236,30 @@ export default function Home() {
             const body = JSON.parse(init.body as string);
             body.conversationId = conversationIdRef.current;
             init.body = JSON.stringify(body);
+            console.log('Injected conversationId into request:', conversationIdRef.current);
           } catch (e) {
-            console.error('Failed to parse body:', e);
+            console.error('Failed to inject conversationId:', e);
           }
         }
         const result = await originalFetch(input, init);
-        // Restore original fetch
-        window.fetch = originalFetch;
+        // Restore original fetch after the call completes
+        setTimeout(() => {
+          window.fetch = originalFetch;
+        }, 0);
         return result;
       };
-    }
-    return baseSendMessage(message);
-  }, [baseSendMessage]);
+
+      // Call the original sendMessage
+      return originalSendMessage(message);
+    },
+    [originalSendMessage]
+  );
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [viewMode, setViewMode] = useState<ViewMode>("chat");
   const [summaryPeriod, setSummaryPeriod] = useState<"week" | "month">("week");
+  const [showPreview, setShowPreview] = useState(false);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Initialize theme from localStorage and system preference
@@ -270,26 +294,58 @@ export default function Home() {
   // Load conversation and messages from database on mount
   useEffect(() => {
     async function loadData() {
+      // Only load data if user is authenticated
+      if (!user || authLoading) {
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       try {
         // Get or create conversation
         let convId = localStorage.getItem(CONVERSATION_ID_KEY);
+        let needsNewConversation = !convId;
 
-        if (!convId) {
-          // Create a new conversation
+        // If we have a conversation ID, verify it exists in the database
+        if (convId) {
+          console.log('Checking if conversation exists:', convId);
+          const existingConv = await getConversations();
+          const convExists = existingConv.some(c => c.id === convId);
+
+          if (!convExists) {
+            console.warn('Conversation from localStorage not found in database, creating new one');
+            localStorage.removeItem(CONVERSATION_ID_KEY);
+            convId = null;
+            needsNewConversation = true;
+          } else {
+            console.log('Using existing conversation:', convId);
+          }
+        }
+
+        // Create new conversation if needed
+        if (needsNewConversation) {
+          console.log('Creating new conversation for user:', user.id);
           const newConv = await createConversation("Daily Report");
           if (newConv) {
             convId = newConv.id;
             localStorage.setItem(CONVERSATION_ID_KEY, convId);
+            console.log('Conversation created and saved:', convId);
+          } else {
+            console.error('Failed to create conversation - cannot proceed');
+            setIsLoading(false);
+            return;
           }
         }
 
         if (convId) {
           setConversationId(convId);
           conversationIdRef.current = convId;
+          console.log('Conversation ID set:', convId);
 
           // Load messages from database
+          console.log('Loading messages from database...');
           const dbMessages = await getAllMessages();
+          console.log('Loaded', dbMessages.length, 'messages from database');
 
           if (dbMessages.length > 0) {
             // Convert database messages to AI SDK format
@@ -323,7 +379,7 @@ export default function Home() {
     }
 
     loadData();
-  }, [setMessages]);
+  }, [user, authLoading, setMessages]);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -351,6 +407,49 @@ export default function Home() {
     localStorage.removeItem(STORAGE_KEY);
   };
 
+  // Show preview modal
+  const showExportPreview = () => {
+    setShowPreview(true);
+  };
+
+  // Export report function
+  const exportReport = async () => {
+    try {
+      const response = await fetch("/api/export-report", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ messages }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to generate report");
+      }
+
+      // Create a blob from the response
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary link and trigger download
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `DAR_Report_${new Date().toISOString().split("T")[0]}.docx`;
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      // Close preview modal
+      setShowPreview(false);
+    } catch (error) {
+      console.error("Error exporting report:", error);
+      alert("Failed to export report. Please try again.");
+    }
+  };
+
   // Scroll to specific date
   const scrollToDate = (dateKey: string) => {
     const element = dateRefs.current[dateKey];
@@ -362,6 +461,25 @@ export default function Home() {
   const uniqueDates = getUniqueDates(messages);
   const weeklyGroups = groupMessagesByWeek(messages);
   const monthlyGroups = groupMessagesByMonth(messages);
+
+  // Show loading screen while checking authentication
+  if (authLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+        <div className="text-center">
+          <div className="mb-6 inline-flex rounded-3xl bg-gradient-to-br from-blue-100 to-indigo-100 p-6 shadow-lg dark:from-blue-950/50 dark:to-indigo-950/50">
+            <div className="size-16 animate-pulse rounded-full bg-blue-600 dark:bg-blue-400" />
+          </div>
+          <h2 className="mb-2 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+            Loading...
+          </h2>
+          <p className="text-base text-zinc-600 dark:text-zinc-400">
+            Please wait
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
@@ -437,26 +555,35 @@ export default function Home() {
               )}
             </button>
 
+            {/* Export Button */}
+            {messages.length > 0 && (
+              <button
+                onClick={showExportPreview}
+                className="group rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 p-2.5 text-green-700 shadow-sm transition-all hover:scale-105 hover:from-green-100 hover:to-emerald-200 hover:shadow-md active:scale-95 dark:from-green-950/50 dark:to-emerald-900/50 dark:text-green-300 dark:hover:from-green-900/60 dark:hover:to-emerald-800/60"
+                title="Export report as DOCX"
+              >
+                <FileDownIcon className="size-5 transition-transform group-hover:translate-y-0.5" />
+              </button>
+            )}
+
             {/* Clear Button */}
             {messages.length > 0 && (
               <button
                 onClick={clearChat}
-                className="group flex items-center gap-2 rounded-xl bg-gradient-to-br from-red-50 to-red-100 px-4 py-2.5 text-sm font-medium text-red-700 shadow-sm transition-all hover:scale-105 hover:from-red-100 hover:to-red-200 hover:shadow-md active:scale-95 dark:from-red-950/50 dark:to-red-900/50 dark:text-red-300 dark:hover:from-red-900/60 dark:hover:to-red-800/60"
+                className="group rounded-xl bg-gradient-to-br from-red-50 to-red-100 p-2.5 text-red-700 shadow-sm transition-all hover:scale-105 hover:from-red-100 hover:to-red-200 hover:shadow-md active:scale-95 dark:from-red-950/50 dark:to-red-900/50 dark:text-red-300 dark:hover:from-red-900/60 dark:hover:to-red-800/60"
                 title="Clear chat history"
               >
-                <Trash2Icon className="size-4 transition-transform group-hover:rotate-12" />
-                <span className="hidden sm:inline">Clear</span>
+                <Trash2Icon className="size-5 transition-transform group-hover:rotate-12" />
               </button>
             )}
 
             {/* Sign Out Button */}
             <button
               onClick={signOut}
-              className="group flex items-center gap-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:from-zinc-200 hover:to-zinc-300 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 dark:hover:from-zinc-700 dark:hover:to-zinc-600"
+              className="group rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 p-2.5 text-zinc-700 shadow-sm transition-all hover:scale-105 hover:from-zinc-200 hover:to-zinc-300 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 dark:hover:from-zinc-700 dark:hover:to-zinc-600"
               title="Sign out"
             >
-              <LogOutIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
-              <span className="hidden sm:inline">Sign Out</span>
+              <LogOutIcon className="size-5 transition-transform group-hover:-translate-x-0.5" />
             </button>
           </div>
         </div>
@@ -751,6 +878,146 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Export Preview Modal */}
+      {showPreview && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900">
+            {/* Modal Header */}
+            <div className="sticky top-0 border-b border-zinc-200 bg-white/95 backdrop-blur-xl px-6 py-5 dark:border-zinc-800 dark:bg-zinc-900/95">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                    Export Preview
+                  </h2>
+                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                    Review your report before exporting to DOCX
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="group rounded-xl bg-zinc-100 p-2.5 text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  title="Close preview"
+                >
+                  <XIcon className="size-5 transition-transform group-hover:rotate-90" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Content - Scrollable */}
+            <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+              {/* Report Header Preview */}
+              <div className="mb-6 text-center">
+                <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+                  Daily Accomplishment Report
+                </h1>
+                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                  Generated on{" "}
+                  {new Date().toLocaleString("en-US", {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                  })}
+                </p>
+              </div>
+
+              {/* Table Preview */}
+              <div className="overflow-x-auto rounded-xl border border-zinc-200 shadow-lg dark:border-zinc-700">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gradient-to-r from-indigo-600 to-indigo-700">
+                      <th className="border-r border-indigo-500 px-4 py-3 text-left text-sm font-bold text-white" style={{ width: '25%' }}>
+                        Date & Time
+                      </th>
+                      <th className="border-r border-indigo-500 px-4 py-3 text-center text-sm font-bold text-white" style={{ width: '15%' }}>
+                        Role
+                      </th>
+                      <th className="px-4 py-3 text-left text-sm font-bold text-white" style={{ width: '60%' }}>
+                        Message
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {messages.map((message, index) => {
+                      const msg = message as any;
+                      const timestamp = msg.createdAt
+                        ? new Date(msg.createdAt).toLocaleString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "2-digit",
+                            hour12: true,
+                          })
+                        : "N/A";
+                      const role = message.role === "user" ? "You" : "AI Assistant";
+                      let content = "";
+                      if (message.parts && Array.isArray(message.parts)) {
+                        content = message.parts.map((part: any) => part.text || "").join(" ");
+                      } else if (msg.content) {
+                        content = msg.content;
+                      }
+
+                      return (
+                        <tr
+                          key={message.id}
+                          className={index % 2 === 0 ? "bg-zinc-50 dark:bg-zinc-800/50" : "bg-white dark:bg-zinc-900"}
+                        >
+                          <td className="border-r border-zinc-200 px-4 py-3 text-sm text-zinc-700 dark:border-zinc-700 dark:text-zinc-300">
+                            {timestamp}
+                          </td>
+                          <td className="border-r border-zinc-200 px-4 py-3 text-center dark:border-zinc-700">
+                            <span
+                              className={`inline-block rounded-full px-3 py-1 text-xs font-bold ${
+                                message.role === "user"
+                                  ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                                  : "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                              }`}
+                            >
+                              {role}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-zinc-700 dark:text-zinc-300">
+                            <div className="line-clamp-3">{content}</div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Info Note */}
+              <div className="mt-4 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
+                <strong>Note:</strong> This preview shows how your data will be organized in the DOCX file. The actual
+                document will be formatted for 8.5 x 13 inch paper with professional styling.
+              </div>
+            </div>
+
+            {/* Modal Footer - Sticky */}
+            <div className="sticky bottom-0 border-t border-zinc-200 bg-white/95 backdrop-blur-xl px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900/95">
+              <div className="flex items-center justify-end gap-3">
+                <button
+                  onClick={() => setShowPreview(false)}
+                  className="rounded-xl bg-zinc-100 px-5 py-2.5 font-semibold text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={exportReport}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg active:scale-95"
+                >
+                  <FileDownIcon className="size-4" />
+                  Export DOCX
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
