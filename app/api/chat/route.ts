@@ -1,11 +1,39 @@
 import { anthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, streamText } from "ai";
 import { createMessageServer } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 // Note: Using Node.js runtime to access SUPABASE_SERVICE_ROLE_KEY
 // Edge runtime doesn't have access to non-NEXT_PUBLIC_ environment variables
 
 export async function POST(req: Request) {
+  // Get user from session
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  const cookieStore = await cookies();
+  const allCookies = cookieStore.getAll();
+  const cookieHeader = allCookies
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join('; ');
+
+  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        cookie: cookieHeader,
+      },
+    },
+  });
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const { messages, conversationId } = await req.json();
 
   // Save user message to database
@@ -18,7 +46,8 @@ export async function POST(req: Request) {
     await createMessageServer(
       conversationId,
       'user',
-      userMessageContent
+      userMessageContent,
+      user.id
     );
   }
 
@@ -41,7 +70,8 @@ Be encouraging, supportive, and help users see the value in their daily work.`,
         await createMessageServer(
           conversationId,
           'assistant',
-          text
+          text,
+          user.id
         );
       }
     },

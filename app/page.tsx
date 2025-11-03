@@ -29,6 +29,8 @@ import {
   SunIcon,
   Trash2Icon,
   XIcon,
+  LogOutIcon,
+  UserIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
@@ -38,6 +40,7 @@ import {
   deleteConversation,
   getConversations,
 } from "@/lib/supabase";
+import { useAuth } from "@/lib/auth/auth-context";
 
 const STORAGE_KEY = "dar-chat-messages";
 const CONVERSATION_ID_KEY = "dar-conversation-id";
@@ -198,6 +201,7 @@ function groupMessagesByMonth(messages: any[]) {
 }
 
 export default function Home() {
+  const { user, signOut, loading: authLoading } = useAuth();
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const conversationIdRef = useRef<string | null>(null);
@@ -412,6 +416,14 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* User Info */}
+            {user && (
+              <div className="hidden items-center gap-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 md:flex">
+                <UserIcon className="size-4" />
+                <span className="max-w-[150px] truncate">{user.email}</span>
+              </div>
+            )}
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
@@ -436,6 +448,16 @@ export default function Home() {
                 <span className="hidden sm:inline">Clear</span>
               </button>
             )}
+
+            {/* Sign Out Button */}
+            <button
+              onClick={signOut}
+              className="group flex items-center gap-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:from-zinc-200 hover:to-zinc-300 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 dark:hover:from-zinc-700 dark:hover:to-zinc-600"
+              title="Sign out"
+            >
+              <LogOutIcon className="size-4 transition-transform group-hover:-translate-x-0.5" />
+              <span className="hidden sm:inline">Sign Out</span>
+            </button>
           </div>
         </div>
       </header>

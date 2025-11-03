@@ -4,10 +4,21 @@ import type { Conversation, Message } from './types'
 
 // Conversation operations
 export async function createConversation(title?: string): Promise<Conversation | null> {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    console.error('User not authenticated')
+    return null
+  }
+
   const { data, error } = await supabase
     .from('conversations')
     // @ts-ignore - Type issues with Supabase client
-    .insert({ title: title || null })
+    .insert({
+      title: title || null,
+      user_id: user.id
+    })
     .select()
     .single()
 
@@ -83,6 +94,14 @@ export async function createMessage(
   role: 'user' | 'assistant' | 'system',
   content: string
 ): Promise<Message | null> {
+  // Get current user
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (!user) {
+    console.error('User not authenticated')
+    return null
+  }
+
   const { data, error } = await supabase
     .from('messages')
     // @ts-ignore - Type issues with Supabase client
@@ -90,6 +109,7 @@ export async function createMessage(
       conversation_id: conversationId,
       role,
       content,
+      user_id: user.id
     })
     .select()
     .single()
@@ -149,7 +169,8 @@ export async function deleteMessage(id: string): Promise<boolean> {
 export async function createMessageServer(
   conversationId: string | null,
   role: 'user' | 'assistant' | 'system',
-  content: string
+  content: string,
+  userId: string
 ): Promise<Message | null> {
   const { data, error } = await supabaseServer
     .from('messages')
@@ -158,6 +179,7 @@ export async function createMessageServer(
       conversation_id: conversationId,
       role,
       content,
+      user_id: userId
     })
     .select()
     .single()

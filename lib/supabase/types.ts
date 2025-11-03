@@ -1,6 +1,7 @@
 export type Conversation = {
   id: string
   title: string | null
+  user_id: string | null
   created_at: string
   updated_at: string
 }
@@ -8,6 +9,7 @@ export type Conversation = {
 export type Message = {
   id: string
   conversation_id: string | null
+  user_id: string | null
   role: 'user' | 'assistant' | 'system'
   content: string
   created_at: string
