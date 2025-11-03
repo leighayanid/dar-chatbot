@@ -32,9 +32,11 @@ import {
   LogOutIcon,
   UserIcon,
   FileDownIcon,
+  SettingsIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   createConversation,
   createMessage,
@@ -554,6 +556,15 @@ export default function Home() {
                 <SunIcon className="size-5 transition-transform group-hover:rotate-12" />
               )}
             </button>
+
+            {/* Settings Button */}
+            <Link
+              href="/settings"
+              className="group rounded-xl bg-gradient-to-br from-rose-50 to-orange-100 p-2.5 text-rose-700 shadow-sm transition-all hover:scale-105 hover:from-rose-100 hover:to-orange-200 hover:shadow-md active:scale-95 dark:from-rose-950/50 dark:to-orange-900/50 dark:text-rose-300 dark:hover:from-rose-900/60 dark:hover:to-orange-800/60"
+              title="Account settings"
+            >
+              <SettingsIcon className="size-5 transition-transform group-hover:rotate-90" />
+            </Link>
 
             {/* Export Button */}
             {messages.length > 0 && (

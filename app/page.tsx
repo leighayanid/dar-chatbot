@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import Image from 'next/image'
 import { ThemeToggle } from '@/components/theme-toggle'
 import {
   SparklesIcon,
@@ -22,8 +23,14 @@ export default function LandingPage() {
       <header className="fixed left-0 right-0 top-0 z-50 border-b border-zinc-200/50 bg-white/80 backdrop-blur-xl dark:border-zinc-800/50 dark:bg-zinc-900/80">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2">
-            <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600">
-              <SparklesIcon className="size-6 text-white" />
+            <div className="flex size-10 items-center justify-center">
+              <Image
+                src="/logo.png"
+                alt="DAR Logo"
+                width={40}
+                height={40}
+                className="rounded-xl"
+              />
             </div>
             <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">DAR</span>
           </div>
@@ -37,7 +44,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/register"
-              className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+              className="rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
             >
               Get Started
             </Link>
@@ -51,14 +58,14 @@ export default function LandingPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Left Column - Text Content */}
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 dark:border-blue-900 dark:bg-blue-950 dark:text-blue-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-medium text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300">
                 <SparklesIcon className="size-4" />
                 Track Your Success Daily
               </div>
 
               <h1 className="text-5xl font-bold leading-tight tracking-tight text-zinc-900 dark:text-zinc-50 sm:text-6xl lg:text-7xl">
                 Your Daily
-                <span className="block bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <span className="block bg-gradient-to-r from-rose-400 via-orange-400 to-amber-400 bg-clip-text text-transparent">
                   Accomplishment
                 </span>
                 Companion
@@ -72,7 +79,7 @@ export default function LandingPage() {
               <div className="flex flex-wrap gap-4">
                 <Link
                   href="/register"
-                  className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
+                  className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
                 >
                   Start Free Today
                   <svg className="size-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -106,12 +113,12 @@ export default function LandingPage() {
 
             {/* Right Column - Illustration */}
             <div className="relative">
-              <div className="relative rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-50 p-8 shadow-2xl dark:from-blue-950/20 dark:to-indigo-950/20">
+              <div className="relative rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 p-8 shadow-2xl dark:from-amber-950/20 dark:to-orange-950/20">
                 <HeroIllustration />
               </div>
               {/* Floating elements */}
-              <div className="absolute -right-4 -top-4 size-24 animate-pulse rounded-full bg-gradient-to-br from-blue-400 to-indigo-400 opacity-20 blur-2xl" />
-              <div className="absolute -bottom-4 -left-4 size-32 animate-pulse rounded-full bg-gradient-to-br from-purple-400 to-pink-400 opacity-20 blur-2xl" />
+              <div className="absolute -right-4 -top-4 size-24 animate-pulse rounded-full bg-gradient-to-br from-rose-300 to-orange-300 opacity-20 blur-2xl" />
+              <div className="absolute -bottom-4 -left-4 size-32 animate-pulse rounded-full bg-gradient-to-br from-emerald-300 to-teal-300 opacity-20 blur-2xl" />
             </div>
           </div>
         </div>
@@ -131,8 +138,8 @@ export default function LandingPage() {
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {/* Feature 1 */}
-            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-blue-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white">
+            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-rose-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-rose-700">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-rose-400 to-pink-400 text-white">
                 <BrainIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -144,8 +151,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 2 */}
-            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-indigo-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-indigo-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-500 text-white">
+            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-amber-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-amber-700">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-yellow-400 text-white">
                 <ChartIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -157,8 +164,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 3 */}
-            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-purple-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-purple-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 text-white">
+            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-emerald-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-emerald-700">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-teal-400 text-white">
                 <LightningIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -170,8 +177,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 4 */}
-            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-blue-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-blue-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-orange-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-orange-700">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-amber-400 text-white">
                 <TargetIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -183,8 +190,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 5 */}
-            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-green-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-green-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-green-500 to-emerald-500 text-white">
+            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-lime-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-lime-700">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-lime-400 to-green-400 text-white">
                 <DocumentIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -196,8 +203,8 @@ export default function LandingPage() {
             </div>
 
             {/* Feature 6 */}
-            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-purple-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-purple-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-indigo-500 text-white">
+            <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-cyan-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-cyan-700">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-sky-400 text-white">
                 <ShieldIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -210,7 +217,7 @@ export default function LandingPage() {
 
             {/* Feature 7 */}
             <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-orange-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-orange-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-red-500 text-white">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-orange-400 to-rose-400 text-white">
                 <ClockIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -223,7 +230,7 @@ export default function LandingPage() {
 
             {/* Feature 8 */}
             <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-pink-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-pink-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 text-white">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-pink-400 to-rose-400 text-white">
                 <TrendingIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -236,7 +243,7 @@ export default function LandingPage() {
 
             {/* Feature 9 */}
             <div className="group rounded-2xl border border-zinc-200 bg-white p-8 shadow-lg transition-all hover:scale-105 hover:border-yellow-300 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-yellow-700">
-              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-500 to-orange-500 text-white">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-xl bg-gradient-to-br from-yellow-400 to-amber-400 text-white">
                 <SparklesIcon className="size-6" />
               </div>
               <h3 className="mb-3 text-xl font-semibold text-zinc-900 dark:text-zinc-50">
@@ -253,7 +260,7 @@ export default function LandingPage() {
       {/* Benefits Section */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <div className="rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-12 shadow-2xl lg:p-16">
+          <div className="rounded-3xl bg-gradient-to-br from-rose-400 via-orange-400 to-amber-400 p-12 shadow-2xl lg:p-16">
             <div className="grid items-center gap-12 lg:grid-cols-2">
               <div className="space-y-6">
                 <h2 className="text-4xl font-bold text-white">
@@ -268,7 +275,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white">Boost Confidence</h3>
-                      <p className="text-blue-100">
+                      <p className="text-orange-50">
                         Seeing your progress builds self-confidence and motivation to tackle bigger challenges.
                       </p>
                     </div>
@@ -281,7 +288,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white">Performance Reviews</h3>
-                      <p className="text-blue-100">
+                      <p className="text-orange-50">
                         Have concrete examples ready for reviews, promotions, and career conversations.
                       </p>
                     </div>
@@ -294,7 +301,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white">Identify Patterns</h3>
-                      <p className="text-blue-100">
+                      <p className="text-orange-50">
                         Understand what work energizes you and where you create the most value.
                       </p>
                     </div>
@@ -307,7 +314,7 @@ export default function LandingPage() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white">Combat Imposter Syndrome</h3>
-                      <p className="text-blue-100">
+                      <p className="text-orange-50">
                         Hard evidence of your accomplishments helps silence self-doubt.
                       </p>
                     </div>
@@ -321,10 +328,10 @@ export default function LandingPage() {
                       "DAR has completely changed how I approach my workday. I used to forget all my wins by the end of the week. Now I have a clear record of my progress and feel more confident in my abilities."
                     </p>
                     <div className="flex items-center gap-3">
-                      <div className="size-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-400" />
+                      <div className="size-12 rounded-full bg-gradient-to-br from-amber-300 to-yellow-300" />
                       <div>
                         <div className="font-semibold text-white">Sarah Chen</div>
-                        <div className="text-sm text-blue-100">Product Manager</div>
+                        <div className="text-sm text-orange-50">Product Manager</div>
                       </div>
                     </div>
                   </blockquote>
@@ -347,7 +354,7 @@ export default function LandingPage() {
           <div className="flex flex-wrap justify-center gap-4">
             <Link
               href="/register"
-              className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
+              className="group flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-8 py-4 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl"
             >
               Get Started Free
               <svg className="size-5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -367,8 +374,14 @@ export default function LandingPage() {
           <div className="grid gap-8 md:grid-cols-4">
             <div>
               <div className="mb-4 flex items-center gap-2">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600">
-                  <SparklesIcon className="size-6 text-white" />
+                <div className="flex size-10 items-center justify-center">
+                  <Image
+                    src="/logo.png"
+                    alt="DAR Logo"
+                    width={40}
+                    height={40}
+                    className="rounded-xl"
+                  />
                 </div>
                 <span className="text-xl font-bold text-zinc-900 dark:text-zinc-50">DAR</span>
               </div>
@@ -379,28 +392,28 @@ export default function LandingPage() {
             <div>
               <h3 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-50">Product</h3>
               <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Features</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Pricing</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Security</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Roadmap</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Features</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Pricing</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Security</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Roadmap</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-50">Company</h3>
               <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">About</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Blog</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Careers</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Contact</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">About</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Blog</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Careers</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Contact</Link></li>
               </ul>
             </div>
             <div>
               <h3 className="mb-4 font-semibold text-zinc-900 dark:text-zinc-50">Legal</h3>
               <ul className="space-y-2 text-sm text-zinc-600 dark:text-zinc-400">
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Privacy</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Terms</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">Cookies</Link></li>
-                <li><Link href="#" className="hover:text-blue-600 dark:hover:text-blue-400">License</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Privacy</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Terms</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">Cookies</Link></li>
+                <li><Link href="#" className="hover:text-orange-600 dark:hover:text-orange-400">License</Link></li>
               </ul>
             </div>
           </div>

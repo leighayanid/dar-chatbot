@@ -39,8 +39,12 @@ export async function proxy(request: NextRequest) {
 
   console.log('[Proxy]', request.nextUrl.pathname, 'Session:', !!session)
 
+  // Protected routes that require authentication
+  const protectedRoutes = ['/dashboard', '/settings']
+  const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+
   // If there's no session and the user is trying to access a protected route
-  if (!session && request.nextUrl.pathname === '/') {
+  if (!session && (request.nextUrl.pathname === '/' || isProtectedRoute)) {
     const redirectResponse = NextResponse.redirect(new URL('/login', request.url))
     // Copy cookies to redirect response
     response.cookies.getAll().forEach((cookie) => {
@@ -51,7 +55,7 @@ export async function proxy(request: NextRequest) {
 
   // If there's a session and the user is trying to access the login or register page
   if (session && (request.nextUrl.pathname === '/login' || request.nextUrl.pathname === '/register')) {
-    const redirectResponse = NextResponse.redirect(new URL('/', request.url))
+    const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url))
     // Copy cookies to redirect response
     response.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value)
@@ -63,5 +67,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/register', '/forgot-password'],
+  matcher: ['/', '/login', '/register', '/forgot-password', '/dashboard', '/settings'],
 }
