@@ -37,6 +37,9 @@ import {
   SparklesIcon,
   TrendingUpIcon,
   ChevronDownIcon,
+  CheckSquareIcon,
+  MicIcon,
+  MicOffIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -49,6 +52,10 @@ import {
   getConversations,
 } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth/auth-context";
+import { SmartDailySummary } from "@/components/smart-daily-summary";
+import { OnboardingFlow } from "@/components/onboarding-flow";
+import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 const STORAGE_KEY = "dar-chat-messages";
 const CONVERSATION_ID_KEY = "dar-conversation-id";
@@ -267,8 +274,67 @@ export default function Home() {
   const [summaryPeriod, setSummaryPeriod] = useState<"week" | "month">("week");
   const [showPreview, setShowPreview] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Voice recognition hook
+  const { isListening, transcript, startListening, stopListening, resetTranscript, isSupported } = useSpeechRecognition();
+
+  // Update input value when transcript changes
+  useEffect(() => {
+    if (transcript) {
+      setInputValue(transcript);
+    }
+  }, [transcript]);
+
+  // Toggle voice recording
+  const toggleVoiceRecording = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      resetTranscript();
+      setInputValue('');
+      startListening();
+    }
+  };
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'k',
+      metaKey: true,
+      callback: () => {
+        inputRef.current?.focus();
+      },
+      description: 'Focus input',
+    },
+    {
+      key: 'Enter',
+      metaKey: true,
+      callback: () => {
+        if (inputValue.trim()) {
+          sendMessage({ text: inputValue });
+          setInputValue('');
+          resetTranscript();
+        }
+      },
+      description: 'Send message',
+    },
+    {
+      key: 'Escape',
+      callback: () => {
+        if (isListening) {
+          stopListening();
+        }
+        if (dropdownOpen) {
+          setDropdownOpen(false);
+        }
+      },
+      description: 'Close modals',
+    },
+  ], viewMode === 'chat');
 
   // Initialize theme from localStorage and system preference
   useEffect(() => {
@@ -582,6 +648,15 @@ export default function Home() {
 
                     {/* Navigation Items */}
                     <Link
+                      href="/tasks"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-green-50 dark:text-zinc-300 dark:hover:bg-green-950/30"
+                    >
+                      <CheckSquareIcon className="size-4 text-green-600 dark:text-green-400" />
+                      <span>Tasks</span>
+                    </Link>
+
+                    <Link
                       href="/analytics"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-blue-50 dark:text-zinc-300 dark:hover:bg-blue-950/30"
@@ -746,6 +821,11 @@ export default function Home() {
         <div className="flex flex-1 flex-col items-center overflow-hidden">
           <div className="flex w-full max-w-3xl flex-1 flex-col">
         {viewMode === "chat" ? (
+          <>
+          {/* Smart Daily Summary */}
+          <div className="p-4 pb-0">
+            <SmartDailySummary />
+          </div>
           <Conversation className="flex-1">
           <ConversationContent>
             {isLoading ? (
@@ -953,19 +1033,44 @@ export default function Home() {
                 <PromptInput
                   onSubmit={(message, event) => {
                     event.preventDefault();
-                    if (message.text?.trim()) {
-                      sendMessage({ text: message.text });
+                    if (inputValue.trim()) {
+                      sendMessage({ text: inputValue });
+                      setInputValue('');
+                      resetTranscript();
                     }
                   }}
                 >
                   <PromptInputBody>
                     <PromptInputTextarea
-                      placeholder="What did you accomplish today?"
+                      ref={inputRef}
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      placeholder="What did you accomplish today? (Cmd/Ctrl+K to focus, Cmd/Ctrl+Enter to send)"
                       className="min-h-[60px] resize-none rounded-xl border-0 bg-white px-4 py-3 text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
                     />
                   </PromptInputBody>
                   <PromptInputFooter className="flex items-center justify-between px-3 pb-2">
-                    <PromptInputTools />
+                    <div className="flex items-center gap-2">
+                      <PromptInputTools />
+                      {isSupported && (
+                        <button
+                          type="button"
+                          onClick={toggleVoiceRecording}
+                          className={`rounded-lg p-2 transition-all hover:scale-105 active:scale-95 ${
+                            isListening
+                              ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                              : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600'
+                          }`}
+                          title={isListening ? 'Stop recording' : 'Start voice input'}
+                        >
+                          {isListening ? (
+                            <MicOffIcon className="size-4 animate-pulse" />
+                          ) : (
+                            <MicIcon className="size-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                     <PromptInputSubmit
                       status={status}
                       className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
@@ -974,6 +1079,7 @@ export default function Home() {
                 </PromptInput>
               </div>
             </div>
+          </>
         )}
           </div>
         </div>
@@ -1118,6 +1224,9 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* Onboarding Flow */}
+      <OnboardingFlow />
     </div>
   );
 }
