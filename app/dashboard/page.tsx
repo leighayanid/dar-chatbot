@@ -33,6 +33,9 @@ import {
   UserIcon,
   FileDownIcon,
   SettingsIcon,
+  FileTextIcon,
+  SparklesIcon,
+  TrendingUpIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -543,6 +546,33 @@ export default function Home() {
                 <span className="max-w-[150px] truncate">{user.email}</span>
               </div>
             )}
+
+            {/* Analytics Button */}
+            <Link
+              href="/analytics"
+              className="group rounded-xl bg-gradient-to-br from-blue-50 to-cyan-100 p-2.5 text-blue-700 shadow-sm transition-all hover:scale-105 hover:from-blue-100 hover:to-cyan-200 hover:shadow-md active:scale-95 dark:from-blue-950/50 dark:to-cyan-900/50 dark:text-blue-300 dark:hover:from-blue-900/60 dark:hover:to-cyan-800/60"
+              title="View analytics"
+            >
+              <TrendingUpIcon className="size-5 transition-transform group-hover:scale-110" />
+            </Link>
+
+            {/* Templates Button */}
+            <Link
+              href="/templates"
+              className="group rounded-xl bg-gradient-to-br from-purple-50 to-pink-100 p-2.5 text-purple-700 shadow-sm transition-all hover:scale-105 hover:from-purple-100 hover:to-pink-200 hover:shadow-md active:scale-95 dark:from-purple-950/50 dark:to-pink-900/50 dark:text-purple-300 dark:hover:from-purple-900/60 dark:hover:to-pink-800/60"
+              title="Browse templates"
+            >
+              <SparklesIcon className="size-5 transition-transform group-hover:rotate-12" />
+            </Link>
+
+            {/* Reports Button */}
+            <Link
+              href="/reports"
+              className="group rounded-xl bg-gradient-to-br from-amber-50 to-yellow-100 p-2.5 text-amber-700 shadow-sm transition-all hover:scale-105 hover:from-amber-100 hover:to-yellow-200 hover:shadow-md active:scale-95 dark:from-amber-950/50 dark:to-yellow-900/50 dark:text-amber-300 dark:hover:from-amber-900/60 dark:hover:to-yellow-800/60"
+              title="View reports"
+            >
+              <FileTextIcon className="size-5 transition-transform group-hover:scale-110" />
+            </Link>
 
             {/* Theme Toggle */}
             <button

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase'
-import { ArrowLeftIcon, UserIcon, SaveIcon, Loader2Icon } from 'lucide-react'
+import { ArrowLeftIcon, UserIcon, SaveIcon, Loader2Icon, BellIcon } from 'lucide-react'
 import Link from 'next/link'
 
 interface UserProfile {
@@ -13,6 +13,15 @@ interface UserProfile {
   bio: string | null
   job_title: string | null
   company: string | null
+}
+
+interface UserPreferences {
+  reminder_enabled: boolean
+  reminder_time: string
+  reminder_days: number[]
+  email_weekly_summary: boolean
+  email_monthly_summary: boolean
+  timezone: string
 }
 
 export default function SettingsPage() {
@@ -29,6 +38,14 @@ export default function SettingsPage() {
     job_title: '',
     company: '',
   })
+  const [preferences, setPreferences] = useState<UserPreferences>({
+    reminder_enabled: true,
+    reminder_time: '17:00',
+    reminder_days: [1, 2, 3, 4, 5],
+    email_weekly_summary: true,
+    email_monthly_summary: true,
+    timezone: 'UTC',
+  })
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -37,36 +54,59 @@ export default function SettingsPage() {
     }
   }, [user, authLoading, router])
 
-  // Load user profile
+  // Load user profile and preferences
   useEffect(() => {
     async function loadProfile() {
       if (!user) return
 
       try {
         setLoading(true)
-        const { data, error } = await supabase
+
+        // Load profile
+        const { data: profileData, error: profileError } = await supabase
           .from('user_profiles')
           .select('*')
           .eq('id', user.id)
           .single()
 
-        if (error && error.code !== 'PGRST116') {
-          // PGRST116 is "not found" error, which is fine for new users
-          throw error
+        if (profileError && profileError.code !== 'PGRST116') {
+          throw profileError
         }
 
-        if (data) {
+        if (profileData) {
           setProfile({
-            full_name: data.full_name || '',
-            avatar_url: data.avatar_url || '',
-            bio: data.bio || '',
-            job_title: data.job_title || '',
-            company: data.company || '',
+            full_name: profileData.full_name || '',
+            avatar_url: profileData.avatar_url || '',
+            bio: profileData.bio || '',
+            job_title: profileData.job_title || '',
+            company: profileData.company || '',
+          })
+        }
+
+        // Load preferences
+        const { data: prefsData, error: prefsError } = await supabase
+          .from('user_preferences')
+          .select('*')
+          .eq('id', user.id)
+          .single()
+
+        if (prefsError && prefsError.code !== 'PGRST116') {
+          throw prefsError
+        }
+
+        if (prefsData) {
+          setPreferences({
+            reminder_enabled: prefsData.reminder_enabled,
+            reminder_time: prefsData.reminder_time || '17:00',
+            reminder_days: prefsData.reminder_days || [1, 2, 3, 4, 5],
+            email_weekly_summary: prefsData.email_weekly_summary,
+            email_monthly_summary: prefsData.email_monthly_summary,
+            timezone: prefsData.timezone || 'UTC',
           })
         }
       } catch (err) {
-        console.error('Error loading profile:', err)
-        setError('Failed to load profile')
+        console.error('Error loading settings:', err)
+        setError('Failed to load settings')
       } finally {
         setLoading(false)
       }
@@ -88,13 +128,13 @@ export default function SettingsPage() {
 
     try {
       // Check if profile exists
-      const { data: existing } = await supabase
+      const { data: existingProfile } = await supabase
         .from('user_profiles')
         .select('id')
         .eq('id', user.id)
         .single()
 
-      if (existing) {
+      if (existingProfile) {
         // Update existing profile
         const { error: updateError } = await supabase
           .from('user_profiles')
@@ -124,11 +164,48 @@ export default function SettingsPage() {
         if (insertError) throw insertError
       }
 
+      // Update or insert preferences
+      const { data: existingPrefs } = await supabase
+        .from('user_preferences')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      if (existingPrefs) {
+        const { error: prefsUpdateError } = await supabase
+          .from('user_preferences')
+          .update({
+            reminder_enabled: preferences.reminder_enabled,
+            reminder_time: preferences.reminder_time,
+            reminder_days: preferences.reminder_days,
+            email_weekly_summary: preferences.email_weekly_summary,
+            email_monthly_summary: preferences.email_monthly_summary,
+            timezone: preferences.timezone,
+          })
+          .eq('id', user.id)
+
+        if (prefsUpdateError) throw prefsUpdateError
+      } else {
+        const { error: prefsInsertError } = await supabase
+          .from('user_preferences')
+          .insert({
+            id: user.id,
+            reminder_enabled: preferences.reminder_enabled,
+            reminder_time: preferences.reminder_time,
+            reminder_days: preferences.reminder_days,
+            email_weekly_summary: preferences.email_weekly_summary,
+            email_monthly_summary: preferences.email_monthly_summary,
+            timezone: preferences.timezone,
+          })
+
+        if (prefsInsertError) throw prefsInsertError
+      }
+
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
-      console.error('Error saving profile:', err)
-      setError('Failed to save profile. Please try again.')
+      console.error('Error saving settings:', err)
+      setError('Failed to save settings. Please try again.')
     } finally {
       setSaving(false)
     }
@@ -300,8 +377,145 @@ export default function SettingsPage() {
                 />
               </div>
 
+              {/* Divider */}
+              <div className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="rounded-xl bg-gradient-to-br from-blue-400 to-cyan-400 p-3">
+                    <BellIcon className="size-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                      Notifications & Reminders
+                    </h3>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      Configure when and how you want to be reminded
+                    </p>
+                  </div>
+                </div>
+
+                {/* Daily Reminders */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        Daily Reminders
+                      </label>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        Get reminded to log your daily accomplishments
+                      </p>
+                    </div>
+                    <label className="relative inline-flex cursor-pointer items-center">
+                      <input
+                        type="checkbox"
+                        checked={preferences.reminder_enabled}
+                        onChange={(e) => setPreferences({ ...preferences, reminder_enabled: e.target.checked })}
+                        className="peer sr-only"
+                      />
+                      <div className="peer h-6 w-11 rounded-full bg-zinc-300 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-gradient-to-r peer-checked:from-rose-400 peer-checked:to-orange-400 peer-checked:after:translate-x-5 dark:bg-zinc-700"></div>
+                    </label>
+                  </div>
+
+                  {preferences.reminder_enabled && (
+                    <>
+                      {/* Reminder Time */}
+                      <div>
+                        <label htmlFor="reminder_time" className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                          Reminder Time
+                        </label>
+                        <input
+                          id="reminder_time"
+                          type="time"
+                          value={preferences.reminder_time}
+                          onChange={(e) => setPreferences({ ...preferences, reminder_time: e.target.value })}
+                          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
+                        />
+                      </div>
+
+                      {/* Reminder Days */}
+                      <div>
+                        <label className="mb-3 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                          Remind me on
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {[
+                            { value: 0, label: 'Sun' },
+                            { value: 1, label: 'Mon' },
+                            { value: 2, label: 'Tue' },
+                            { value: 3, label: 'Wed' },
+                            { value: 4, label: 'Thu' },
+                            { value: 5, label: 'Fri' },
+                            { value: 6, label: 'Sat' },
+                          ].map((day) => (
+                            <button
+                              key={day.value}
+                              type="button"
+                              onClick={() => {
+                                const days = preferences.reminder_days.includes(day.value)
+                                  ? preferences.reminder_days.filter(d => d !== day.value)
+                                  : [...preferences.reminder_days, day.value].sort()
+                                setPreferences({ ...preferences, reminder_days: days })
+                              }}
+                              className={`rounded-xl px-4 py-2 text-sm font-medium transition-all ${
+                                preferences.reminder_days.includes(day.value)
+                                  ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
+                                  : 'bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700'
+                              }`}
+                            >
+                              {day.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Email Summaries */}
+                  <div className="space-y-3 pt-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                          Weekly Email Summary
+                        </label>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          Receive a summary of your week every Sunday
+                        </p>
+                      </div>
+                      <label className="relative inline-flex cursor-pointer items-center">
+                        <input
+                          type="checkbox"
+                          checked={preferences.email_weekly_summary}
+                          onChange={(e) => setPreferences({ ...preferences, email_weekly_summary: e.target.checked })}
+                          className="peer sr-only"
+                        />
+                        <div className="peer h-6 w-11 rounded-full bg-zinc-300 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-gradient-to-r peer-checked:from-rose-400 peer-checked:to-orange-400 peer-checked:after:translate-x-5 dark:bg-zinc-700"></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                          Monthly Email Summary
+                        </label>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                          Receive a summary of your month on the 1st
+                        </p>
+                      </div>
+                      <label className="relative inline-flex cursor-pointer items-center">
+                        <input
+                          type="checkbox"
+                          checked={preferences.email_monthly_summary}
+                          onChange={(e) => setPreferences({ ...preferences, email_monthly_summary: e.target.checked })}
+                          className="peer sr-only"
+                        />
+                        <div className="peer h-6 w-11 rounded-full bg-zinc-300 after:absolute after:left-[2px] after:top-[2px] after:size-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-gradient-to-r peer-checked:from-rose-400 peer-checked:to-orange-400 peer-checked:after:translate-x-5 dark:bg-zinc-700"></div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Save Button */}
-              <div className="flex justify-end gap-3 pt-4">
+              <div className="flex justify-end gap-3 pt-6">
                 <Link
                   href="/dashboard"
                   className="rounded-xl bg-zinc-100 px-6 py-3 font-semibold text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"

@@ -40,7 +40,7 @@ export async function proxy(request: NextRequest) {
   console.log('[Proxy]', request.nextUrl.pathname, 'Session:', !!session)
 
   // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/settings']
+  const protectedRoutes = ['/dashboard', '/settings', '/analytics', '/templates', '/reports']
   const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
 
   // If there's no session and the user is trying to access a protected route
@@ -67,5 +67,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/register', '/forgot-password', '/dashboard', '/settings'],
+  matcher: ['/', '/login', '/register', '/forgot-password', '/dashboard', '/settings', '/analytics', '/templates', '/reports'],
 }
