@@ -36,6 +36,7 @@ import {
   FileTextIcon,
   SparklesIcon,
   TrendingUpIcon,
+  ChevronDownIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -265,6 +266,8 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<ViewMode>("chat");
   const [summaryPeriod, setSummaryPeriod] = useState<"week" | "month">("week");
   const [showPreview, setShowPreview] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Initialize theme from localStorage and system preference
@@ -288,6 +291,23 @@ export default function Home() {
     localStorage.setItem(THEME_KEY, newTheme);
     document.documentElement.classList.toggle("dark", newTheme === "dark");
   };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    if (dropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownOpen]);
 
   // Open sidebar by default on desktop
   useEffect(() => {
@@ -539,93 +559,132 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* User Info */}
+            {/* User Info with Dropdown */}
             {user && (
-              <div className="hidden items-center gap-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 md:flex">
-                <UserIcon className="size-4" />
-                <span className="max-w-[150px] truncate">{user.email}</span>
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex items-center gap-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
+                >
+                  <UserIcon className="size-4" />
+                  <span className="hidden max-w-[150px] truncate md:inline">{user.email}</span>
+                  <ChevronDownIcon className={`size-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {dropdownOpen && (
+                  <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-zinc-200 bg-white/95 p-2 shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95">
+                    {/* User Email in Dropdown */}
+                    <div className="mb-2 border-b border-zinc-200 px-3 py-2 dark:border-zinc-800">
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">Signed in as</p>
+                      <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">{user.email}</p>
+                    </div>
+
+                    {/* Navigation Items */}
+                    <Link
+                      href="/analytics"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-blue-50 dark:text-zinc-300 dark:hover:bg-blue-950/30"
+                    >
+                      <TrendingUpIcon className="size-4 text-blue-600 dark:text-blue-400" />
+                      <span>Analytics</span>
+                    </Link>
+
+                    <Link
+                      href="/templates"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-purple-50 dark:text-zinc-300 dark:hover:bg-purple-950/30"
+                    >
+                      <SparklesIcon className="size-4 text-purple-600 dark:text-purple-400" />
+                      <span>Templates</span>
+                    </Link>
+
+                    <Link
+                      href="/reports"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-amber-50 dark:text-zinc-300 dark:hover:bg-amber-950/30"
+                    >
+                      <FileTextIcon className="size-4 text-amber-600 dark:text-amber-400" />
+                      <span>Reports</span>
+                    </Link>
+
+                    <Link
+                      href="/settings"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-rose-50 dark:text-zinc-300 dark:hover:bg-rose-950/30"
+                    >
+                      <SettingsIcon className="size-4 text-rose-600 dark:text-rose-400" />
+                      <span>Settings</span>
+                    </Link>
+
+                    {/* Divider */}
+                    <div className="my-2 border-t border-zinc-200 dark:border-zinc-800" />
+
+                    {/* Actions */}
+                    <button
+                      onClick={() => {
+                        toggleTheme();
+                        setDropdownOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    >
+                      {theme === "light" ? (
+                        <>
+                          <MoonIcon className="size-4 text-zinc-600 dark:text-zinc-400" />
+                          <span>Dark Mode</span>
+                        </>
+                      ) : (
+                        <>
+                          <SunIcon className="size-4 text-zinc-600 dark:text-zinc-400" />
+                          <span>Light Mode</span>
+                        </>
+                      )}
+                    </button>
+
+                    {messages.length > 0 && (
+                      <>
+                        <button
+                          onClick={() => {
+                            showExportPreview();
+                            setDropdownOpen(false);
+                          }}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-green-50 dark:text-zinc-300 dark:hover:bg-green-950/30"
+                        >
+                          <FileDownIcon className="size-4 text-green-600 dark:text-green-400" />
+                          <span>Export DOCX</span>
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            clearChat();
+                            setDropdownOpen(false);
+                          }}
+                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                        >
+                          <Trash2Icon className="size-4" />
+                          <span>Clear Chat</span>
+                        </button>
+                      </>
+                    )}
+
+                    {/* Divider */}
+                    <div className="my-2 border-t border-zinc-200 dark:border-zinc-800" />
+
+                    {/* Sign Out */}
+                    <button
+                      onClick={() => {
+                        signOut();
+                        setDropdownOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                    >
+                      <LogOutIcon className="size-4 text-zinc-600 dark:text-zinc-400" />
+                      <span>Sign Out</span>
+                    </button>
+                  </div>
+                )}
               </div>
             )}
-
-            {/* Analytics Button */}
-            <Link
-              href="/analytics"
-              className="group rounded-xl bg-gradient-to-br from-blue-50 to-cyan-100 p-2.5 text-blue-700 shadow-sm transition-all hover:scale-105 hover:from-blue-100 hover:to-cyan-200 hover:shadow-md active:scale-95 dark:from-blue-950/50 dark:to-cyan-900/50 dark:text-blue-300 dark:hover:from-blue-900/60 dark:hover:to-cyan-800/60"
-              title="View analytics"
-            >
-              <TrendingUpIcon className="size-5 transition-transform group-hover:scale-110" />
-            </Link>
-
-            {/* Templates Button */}
-            <Link
-              href="/templates"
-              className="group rounded-xl bg-gradient-to-br from-purple-50 to-pink-100 p-2.5 text-purple-700 shadow-sm transition-all hover:scale-105 hover:from-purple-100 hover:to-pink-200 hover:shadow-md active:scale-95 dark:from-purple-950/50 dark:to-pink-900/50 dark:text-purple-300 dark:hover:from-purple-900/60 dark:hover:to-pink-800/60"
-              title="Browse templates"
-            >
-              <SparklesIcon className="size-5 transition-transform group-hover:rotate-12" />
-            </Link>
-
-            {/* Reports Button */}
-            <Link
-              href="/reports"
-              className="group rounded-xl bg-gradient-to-br from-amber-50 to-yellow-100 p-2.5 text-amber-700 shadow-sm transition-all hover:scale-105 hover:from-amber-100 hover:to-yellow-200 hover:shadow-md active:scale-95 dark:from-amber-950/50 dark:to-yellow-900/50 dark:text-amber-300 dark:hover:from-amber-900/60 dark:hover:to-yellow-800/60"
-              title="View reports"
-            >
-              <FileTextIcon className="size-5 transition-transform group-hover:scale-110" />
-            </Link>
-
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="group rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 p-2.5 text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
-              title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
-            >
-              {theme === "light" ? (
-                <MoonIcon className="size-5 transition-transform group-hover:rotate-12" />
-              ) : (
-                <SunIcon className="size-5 transition-transform group-hover:rotate-12" />
-              )}
-            </button>
-
-            {/* Settings Button */}
-            <Link
-              href="/settings"
-              className="group rounded-xl bg-gradient-to-br from-rose-50 to-orange-100 p-2.5 text-rose-700 shadow-sm transition-all hover:scale-105 hover:from-rose-100 hover:to-orange-200 hover:shadow-md active:scale-95 dark:from-rose-950/50 dark:to-orange-900/50 dark:text-rose-300 dark:hover:from-rose-900/60 dark:hover:to-orange-800/60"
-              title="Account settings"
-            >
-              <SettingsIcon className="size-5 transition-transform group-hover:rotate-90" />
-            </Link>
-
-            {/* Export Button */}
-            {messages.length > 0 && (
-              <button
-                onClick={showExportPreview}
-                className="group rounded-xl bg-gradient-to-br from-green-50 to-emerald-100 p-2.5 text-green-700 shadow-sm transition-all hover:scale-105 hover:from-green-100 hover:to-emerald-200 hover:shadow-md active:scale-95 dark:from-green-950/50 dark:to-emerald-900/50 dark:text-green-300 dark:hover:from-green-900/60 dark:hover:to-emerald-800/60"
-                title="Export report as DOCX"
-              >
-                <FileDownIcon className="size-5 transition-transform group-hover:translate-y-0.5" />
-              </button>
-            )}
-
-            {/* Clear Button */}
-            {messages.length > 0 && (
-              <button
-                onClick={clearChat}
-                className="group rounded-xl bg-gradient-to-br from-red-50 to-red-100 p-2.5 text-red-700 shadow-sm transition-all hover:scale-105 hover:from-red-100 hover:to-red-200 hover:shadow-md active:scale-95 dark:from-red-950/50 dark:to-red-900/50 dark:text-red-300 dark:hover:from-red-900/60 dark:hover:to-red-800/60"
-                title="Clear chat history"
-              >
-                <Trash2Icon className="size-5 transition-transform group-hover:rotate-12" />
-              </button>
-            )}
-
-            {/* Sign Out Button */}
-            <button
-              onClick={signOut}
-              className="group rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 p-2.5 text-zinc-700 shadow-sm transition-all hover:scale-105 hover:from-zinc-200 hover:to-zinc-300 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 dark:hover:from-zinc-700 dark:hover:to-zinc-600"
-              title="Sign out"
-            >
-              <LogOutIcon className="size-5 transition-transform group-hover:-translate-x-0.5" />
-            </button>
           </div>
         </div>
       </header>
