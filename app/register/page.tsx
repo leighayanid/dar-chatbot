@@ -60,7 +60,7 @@ export default function RegisterPage() {
 
       if (data.session) {
         // User is signed in immediately (email confirmation disabled)
-        window.location.href = '/'
+        window.location.href = '/dashboard'
       } else {
         // Email confirmation required
         setSuccess(true)

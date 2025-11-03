@@ -41,7 +41,7 @@ export default function LoginPage() {
         console.log('Session created, redirecting...')
         // Small delay to ensure cookies are set
         setTimeout(() => {
-          window.location.href = '/'
+          window.location.href = '/dashboard'
         }, 500)
       } else {
         setError('No session created')
