@@ -1,0 +1,120 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getUsersForDailyReminder } from '@/lib/notifications/reminders'
+import { sendBatchEmails, getEmailStats } from '@/lib/email/send'
+import { renderDailyReminderEmail } from '@/lib/email/templates'
+
+export const runtime = 'edge'
+
+/**
+ * Cron endpoint to send daily reminder emails
+ *
+ * Triggered by Vercel Cron (configured in vercel.json)
+ * Runs every hour and sends reminders to users whose local time matches their reminder_time
+ *
+ * Security: Protected by CRON_SECRET environment variable
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Verify cron secret for security
+    const authHeader = request.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
+
+    if (!cronSecret) {
+      console.error('CRON_SECRET not configured')
+      return NextResponse.json(
+        { error: 'Cron not configured' },
+        { status: 500 }
+      )
+    }
+
+    // Check authorization header
+    if (authHeader !== `Bearer ${cronSecret}`) {
+      console.error('Unauthorized cron request')
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    console.log('Starting daily reminder cron job...')
+
+    // Get users who should receive reminders
+    const users = await getUsersForDailyReminder()
+
+    console.log(`Found ${users.length} eligible users for reminders`)
+
+    if (users.length === 0) {
+      return NextResponse.json({
+        success: true,
+        message: 'No users need reminders at this time',
+        stats: {
+          total: 0,
+          successful: 0,
+          failed: 0,
+          successRate: '100.00',
+        },
+      })
+    }
+
+    // Prepare emails
+    const emails = users.map(user => {
+      const { html, text, subject } = renderDailyReminderEmail({
+        userName: user.full_name,
+        userEmail: user.email,
+      })
+
+      return {
+        to: user.email,
+        subject,
+        react: html as any, // Type assertion needed for edge runtime
+        text,
+      }
+    })
+
+    console.log(`Sending ${emails.length} reminder emails...`)
+
+    // Send emails in batches with rate limiting
+    const results = await sendBatchEmails(emails, 100) // 100ms delay between emails
+
+    // Get statistics
+    const stats = getEmailStats(results)
+
+    console.log('Reminder emails sent:', stats)
+
+    // Log failures for debugging
+    const failures = results
+      .map((result, index) => ({ result, user: users[index] }))
+      .filter(({ result }) => !result.success)
+
+    if (failures.length > 0) {
+      console.error('Failed to send reminders to:', failures.map(f => f.user.email))
+      failures.forEach(({ result, user }) => {
+        console.error(`- ${user.email}: ${result.error}`)
+      })
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Sent ${stats.successful} of ${stats.total} reminder emails`,
+      stats,
+      timestamp: new Date().toISOString(),
+    })
+  } catch (error) {
+    console.error('Error in send-reminders cron:', error)
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        timestamp: new Date().toISOString(),
+      },
+      { status: 500 }
+    )
+  }
+}
+
+/**
+ * POST endpoint for manual testing (same logic as GET)
+ */
+export async function POST(request: NextRequest) {
+  return GET(request)
+}
