@@ -1,0 +1,185 @@
+import { NextRequest, NextResponse } from 'next/server'
+import {
+  createInvitation,
+  getTeamInvitations,
+  getUserRole,
+  cancelInvitation,
+  type TeamRole
+} from '@/lib/supabase/teams'
+import { supabase } from '@/lib/supabase'
+
+export const runtime = 'edge'
+
+// GET /api/teams/[id]/invitations - Get all invitations for a team
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const { id: teamId } = await params
+
+    // Check if user can manage team (owner or admin)
+    const userRole = await getUserRole(teamId, user.id)
+
+    if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
+      return NextResponse.json(
+        { error: 'Forbidden: You must be an owner or admin to view invitations' },
+        { status: 403 }
+      )
+    }
+
+    // Get team invitations
+    const invitations = await getTeamInvitations(teamId)
+
+    return NextResponse.json({ invitations })
+  } catch (error) {
+    console.error('Error fetching invitations:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST /api/teams/[id]/invitations - Create a new invitation
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const { id: teamId } = await params
+
+    // Check if user can manage team (owner or admin)
+    const userRole = await getUserRole(teamId, user.id)
+
+    if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
+      return NextResponse.json(
+        { error: 'Forbidden: You must be an owner or admin to send invitations' },
+        { status: 403 }
+      )
+    }
+
+    // Parse request body
+    const { email, role } = await request.json()
+
+    if (!email || typeof email !== 'string') {
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      )
+    }
+
+    // Validate role
+    const validRoles: TeamRole[] = ['admin', 'member', 'viewer']
+    const invitationRole = (role || 'member') as TeamRole
+
+    if (!validRoles.includes(invitationRole)) {
+      return NextResponse.json(
+        { error: 'Invalid role. Can only invite as admin, member, or viewer' },
+        { status: 400 }
+      )
+    }
+
+    // Create invitation
+    const invitation = await createInvitation(teamId, email, invitationRole)
+
+    if (!invitation) {
+      return NextResponse.json(
+        { error: 'Failed to create invitation' },
+        { status: 500 }
+      )
+    }
+
+    // TODO: Send invitation email
+    // This would require setting up an email service like SendGrid, Resend, etc.
+    console.log('Invitation created:', invitation.token)
+    console.log('Invitation link:', `${process.env.NEXT_PUBLIC_APP_URL}/invitations/${invitation.token}`)
+
+    return NextResponse.json({ invitation }, { status: 201 })
+  } catch (error) {
+    console.error('Error creating invitation:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/teams/[id]/invitations - Cancel an invitation
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const { id: teamId } = await params
+
+    // Check if user can manage team (owner or admin)
+    const userRole = await getUserRole(teamId, user.id)
+
+    if (!userRole || (userRole !== 'owner' && userRole !== 'admin')) {
+      return NextResponse.json(
+        { error: 'Forbidden: You must be an owner or admin to cancel invitations' },
+        { status: 403 }
+      )
+    }
+
+    // Get invitationId from query params
+    const { searchParams } = new URL(request.url)
+    const invitationId = searchParams.get('invitationId')
+
+    if (!invitationId) {
+      return NextResponse.json(
+        { error: 'invitationId is required' },
+        { status: 400 }
+      )
+    }
+
+    // Cancel invitation
+    const success = await cancelInvitation(invitationId)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to cancel invitation' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error canceling invitation:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

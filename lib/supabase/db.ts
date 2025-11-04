@@ -32,7 +32,7 @@ export async function createConversation(title?: string): Promise<Conversation |
     return null
   }
 
-  console.log('createConversation: Conversation created successfully:', data.id);
+  console.log('createConversation: Conversation created successfully:', (data as any).id);
   return data as Conversation
 }
 

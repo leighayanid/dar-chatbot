@@ -56,6 +56,7 @@ import { SmartDailySummary } from "@/components/smart-daily-summary";
 import { OnboardingFlow } from "@/components/onboarding-flow";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
+import { TeamSwitcher } from "@/components/team-switcher";
 
 const STORAGE_KEY = "dar-chat-messages";
 const CONVERSATION_ID_KEY = "dar-conversation-id";
@@ -625,6 +626,9 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Team Switcher */}
+            <TeamSwitcher />
+
             {/* User Info with Dropdown */}
             {user && (
               <div className="relative" ref={dropdownRef}>

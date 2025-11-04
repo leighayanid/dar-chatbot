@@ -69,10 +69,10 @@ export default function AnalyticsPage() {
           // Process activity data by date
           const activityMap = new Map<string, { count: number; words: number }>()
 
-          messages.forEach((msg) => {
+          messages.forEach((msg: any) => {
             const date = new Date(msg.created_at).toISOString().split('T')[0]
             const existing = activityMap.get(date) || { count: 0, words: 0 }
-            const wordCount = msg.content.split(/\s+/).filter(w => w.length > 0).length
+            const wordCount = msg.content.split(/\s+/).filter((w: string) => w.length > 0).length
 
             activityMap.set(date, {
               count: existing.count + 1,
@@ -101,12 +101,12 @@ export default function AnalyticsPage() {
           const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
           const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
-          const thisWeek = messages.filter(m => new Date(m.created_at) >= oneWeekAgo).length
-          const lastWeek = messages.filter(m => {
+          const thisWeek = messages.filter((m: any) => new Date(m.created_at) >= oneWeekAgo).length
+          const lastWeek = messages.filter((m: any) => {
             const date = new Date(m.created_at)
             return date >= twoWeeksAgo && date < oneWeekAgo
           }).length
-          const thisMonth = messages.filter(m => new Date(m.created_at) >= oneMonthAgo).length
+          const thisMonth = messages.filter((m: any) => new Date(m.created_at) >= oneMonthAgo).length
 
           setStats({
             totalMessages,

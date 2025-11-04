@@ -97,7 +97,7 @@ export default function ReportsPage() {
 
       // Group messages by date
       const messagesByDate = new Map<string, string[]>()
-      messages.forEach((msg) => {
+      messages.forEach((msg: any) => {
         const date = new Date(msg.created_at).toISOString().split('T')[0]
         if (!messagesByDate.has(date)) {
           messagesByDate.set(date, [])
@@ -136,7 +136,7 @@ export default function ReportsPage() {
           start_date: startDate.toISOString().split('T')[0],
           end_date: endDate.toISOString().split('T')[0],
           content: reportContent,
-        })
+        } as any)
         .select()
         .single()
 

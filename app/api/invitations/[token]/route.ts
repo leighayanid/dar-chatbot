@@ -1,0 +1,150 @@
+import { NextRequest, NextResponse } from 'next/server'
+import {
+  getInvitationByToken,
+  acceptInvitation,
+  declineInvitation,
+  getTeam
+} from '@/lib/supabase/teams'
+import { supabase } from '@/lib/supabase'
+
+export const runtime = 'edge'
+
+// GET /api/invitations/[token] - Get invitation details by token
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  try {
+    const { token } = await params
+
+    // Get invitation
+    const invitation = await getInvitationByToken(token)
+
+    if (!invitation) {
+      return NextResponse.json(
+        { error: 'Invitation not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if invitation has expired
+    if (new Date(invitation.expires_at) < new Date()) {
+      return NextResponse.json(
+        { error: 'Invitation has expired' },
+        { status: 410 }
+      )
+    }
+
+    // Check if invitation is still pending
+    if (invitation.status !== 'pending') {
+      return NextResponse.json(
+        { error: `Invitation has already been ${invitation.status}` },
+        { status: 400 }
+      )
+    }
+
+    // Get team details
+    const team = await getTeam(invitation.team_id)
+
+    return NextResponse.json({
+      invitation,
+      team
+    })
+  } catch (error) {
+    console.error('Error fetching invitation:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// POST /api/invitations/[token] - Accept an invitation
+export async function POST(
+  request: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  try {
+    // Check authentication
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You must be logged in to accept an invitation' },
+        { status: 401 }
+      )
+    }
+
+    const { token } = await params
+
+    // Get invitation
+    const invitation = await getInvitationByToken(token)
+
+    if (!invitation) {
+      return NextResponse.json(
+        { error: 'Invitation not found' },
+        { status: 404 }
+      )
+    }
+
+    // Check if invitation email matches user email
+    if (invitation.email !== user.email) {
+      return NextResponse.json(
+        { error: 'This invitation was sent to a different email address' },
+        { status: 403 }
+      )
+    }
+
+    // Accept invitation
+    const success = await acceptInvitation(token)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to accept invitation' },
+        { status: 500 }
+      )
+    }
+
+    // Get team details
+    const team = await getTeam(invitation.team_id)
+
+    return NextResponse.json({
+      success: true,
+      team
+    })
+  } catch (error) {
+    console.error('Error accepting invitation:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE /api/invitations/[token] - Decline an invitation
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ token: string }> }
+) {
+  try {
+    const { token } = await params
+
+    // Decline invitation
+    const success = await declineInvitation(token)
+
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to decline invitation' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error declining invitation:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

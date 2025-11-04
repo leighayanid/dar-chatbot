@@ -74,12 +74,13 @@ export default function SettingsPage() {
         }
 
         if (profileData) {
+          const data = profileData as any
           setProfile({
-            full_name: profileData.full_name || '',
-            avatar_url: profileData.avatar_url || '',
-            bio: profileData.bio || '',
-            job_title: profileData.job_title || '',
-            company: profileData.company || '',
+            full_name: data.full_name || '',
+            avatar_url: data.avatar_url || '',
+            bio: data.bio || '',
+            job_title: data.job_title || '',
+            company: data.company || '',
           })
         }
 
@@ -95,13 +96,14 @@ export default function SettingsPage() {
         }
 
         if (prefsData) {
+          const prefs = prefsData as any
           setPreferences({
-            reminder_enabled: prefsData.reminder_enabled,
-            reminder_time: prefsData.reminder_time || '17:00',
-            reminder_days: prefsData.reminder_days || [1, 2, 3, 4, 5],
-            email_weekly_summary: prefsData.email_weekly_summary,
-            email_monthly_summary: prefsData.email_monthly_summary,
-            timezone: prefsData.timezone || 'UTC',
+            reminder_enabled: prefs.reminder_enabled,
+            reminder_time: prefs.reminder_time || '17:00',
+            reminder_days: prefs.reminder_days || [1, 2, 3, 4, 5],
+            email_weekly_summary: prefs.email_weekly_summary,
+            email_monthly_summary: prefs.email_monthly_summary,
+            timezone: prefs.timezone || 'UTC',
           })
         }
       } catch (err) {
@@ -138,6 +140,7 @@ export default function SettingsPage() {
         // Update existing profile
         const { error: updateError } = await supabase
           .from('user_profiles')
+          // @ts-ignore - Supabase type inference issue
           .update({
             full_name: profile.full_name || null,
             avatar_url: profile.avatar_url || null,
@@ -152,6 +155,7 @@ export default function SettingsPage() {
         // Insert new profile
         const { error: insertError } = await supabase
           .from('user_profiles')
+          // @ts-ignore - Supabase type inference issue
           .insert({
             id: user.id,
             full_name: profile.full_name || null,
@@ -174,6 +178,7 @@ export default function SettingsPage() {
       if (existingPrefs) {
         const { error: prefsUpdateError } = await supabase
           .from('user_preferences')
+          // @ts-ignore - Supabase type inference issue
           .update({
             reminder_enabled: preferences.reminder_enabled,
             reminder_time: preferences.reminder_time,
@@ -188,6 +193,7 @@ export default function SettingsPage() {
       } else {
         const { error: prefsInsertError } = await supabase
           .from('user_preferences')
+          // @ts-ignore - Supabase type inference issue
           .insert({
             id: user.id,
             reminder_enabled: preferences.reminder_enabled,

@@ -97,6 +97,7 @@ export default function TemplatesPage() {
     try {
       const { data, error } = await supabase
         .from('templates')
+        // @ts-ignore - Supabase type inference issue
         .insert({
           user_id: user.id,
           name: formData.name,
@@ -127,6 +128,7 @@ export default function TemplatesPage() {
     try {
       const { data, error } = await supabase
         .from('templates')
+        // @ts-ignore - Supabase type inference issue
         .update({
           name: formData.name,
           description: formData.description || null,
@@ -139,7 +141,7 @@ export default function TemplatesPage() {
 
       if (error) throw error
 
-      setTemplates(templates.map(t => t.id === data.id ? data : t))
+      setTemplates(templates.map(t => t.id === (data as any).id ? data as any : t))
       setEditingTemplate(null)
       setFormData({ name: '', description: '', content: '', category: 'custom' })
     } catch (err) {

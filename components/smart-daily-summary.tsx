@@ -80,13 +80,13 @@ export function SmartDailySummary() {
 
         // Calculate stats
         const todayCount = todayMessages?.length || 0
-        const todayWords = todayMessages?.reduce((sum, msg) =>
-          sum + msg.content.split(/\s+/).filter(w => w.length > 0).length, 0
+        const todayWords = todayMessages?.reduce((sum, msg: any) =>
+          sum + msg.content.split(/\s+/).filter((w: string) => w.length > 0).length, 0
         ) || 0
         const yesterdayCount = yesterdayMessages?.length || 0
 
         // Calculate average
-        const allDates = new Set(allMessages?.map(m =>
+        const allDates = new Set(allMessages?.map((m: any) =>
           new Date(m.created_at).toISOString().split('T')[0]
         ))
         const avgCount = allDates.size > 0 ? (allMessages?.length || 0) / allDates.size : 0
