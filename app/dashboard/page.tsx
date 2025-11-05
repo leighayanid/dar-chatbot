@@ -22,29 +22,19 @@ import {
 import { useChat } from "@ai-sdk/react";
 import {
   BarChart3Icon,
-  CalendarIcon,
   MessageSquareIcon,
-  MenuIcon,
-  MoonIcon,
-  SunIcon,
   Trash2Icon,
-  XIcon,
-  LogOutIcon,
-  UserIcon,
   FileDownIcon,
-  SettingsIcon,
-  FileTextIcon,
-  SparklesIcon,
-  TrendingUpIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CheckSquareIcon,
   MicIcon,
   MicOffIcon,
+  CalendarIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  XIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { AppHeader } from "@/components/app-header";
 import {
   createConversation,
   createMessage,
@@ -57,13 +47,11 @@ import { SmartDailySummary } from "@/components/smart-daily-summary";
 import { OnboardingFlow } from "@/components/onboarding-flow";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { TeamSwitcher } from "@/components/team-switcher";
 import { SlashCommandMenu } from "@/components/slash-command-menu";
 import type { SlashCommand } from "@/lib/slash-commands";
 
 const STORAGE_KEY = "dar-chat-messages";
 const CONVERSATION_ID_KEY = "dar-conversation-id";
-const THEME_KEY = "dar-theme";
 
 type ViewMode = "chat" | "summary";
 
@@ -274,15 +262,12 @@ export default function Home() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [historyExpanded, setHistoryExpanded] = useState(true);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [viewMode, setViewMode] = useState<ViewMode>("chat");
   const [summaryPeriod, setSummaryPeriod] = useState<"week" | "month">("week");
   const [showPreview, setShowPreview] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashQuery, setSlashQuery] = useState('');
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -398,52 +383,12 @@ export default function Home() {
         if (isListening) {
           stopListening();
         }
-        if (dropdownOpen) {
-          setDropdownOpen(false);
-        }
       },
       description: 'Close modals',
     },
   ], viewMode === 'chat');
 
-  // Initialize theme from localStorage and system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_KEY) as "light" | "dark" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      document.documentElement.classList.toggle("dark", savedTheme === "dark");
-    } else {
-      // Check system preference
-      const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setTheme(isDark ? "dark" : "light");
-      document.documentElement.classList.toggle("dark", isDark);
-    }
-  }, []);
 
-  // Toggle theme function
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
-    setTheme(newTheme);
-    localStorage.setItem(THEME_KEY, newTheme);
-    document.documentElement.classList.toggle("dark", newTheme === "dark");
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false);
-      }
-    };
-
-    if (dropdownOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [dropdownOpen]);
 
   // Open sidebar by default on desktop
   useEffect(() => {
@@ -644,31 +589,9 @@ export default function Home() {
 
   return (
     <div className="flex h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
-      <header className="flex-shrink-0 w-full border-b border-zinc-200/60 bg-white/80 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-900/80">
-        <div className="flex w-full items-center justify-between px-6 py-5">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="group rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 p-2.5 text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
-              title="Toggle sidebar"
-            >
-              {sidebarOpen ? (
-                <XIcon className="size-5 transition-transform group-hover:rotate-90" />
-              ) : (
-                <MenuIcon className="size-5" />
-              )}
-            </button>
-            <div>
-              <h1 className="bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-2xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
-                Daily Accomplishment Report
-              </h1>
-              <p className="mt-0.5 text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                Track and reflect on your daily achievements
-              </p>
-            </div>
-          </div>
-
-          {/* View Toggle Tabs */}
+      <AppHeader
+        children={
+          /* View Toggle Tabs */
           <div className="hidden items-center gap-1 rounded-xl bg-zinc-100 p-1 md:flex dark:bg-zinc-800">
             <button
               onClick={() => setViewMode("chat")}
@@ -693,149 +616,29 @@ export default function Home() {
               Summary
             </button>
           </div>
+        }
+        actions={
+          messages.length > 0 ? (
+            <>
+              <button
+                onClick={showExportPreview}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-green-50 dark:text-zinc-300 dark:hover:bg-green-950/30"
+              >
+                <FileDownIcon className="size-4 text-green-600 dark:text-green-400" />
+                <span>Export DOCX</span>
+              </button>
 
-          <div className="flex items-center gap-2">
-            {/* Team Switcher */}
-            <TeamSwitcher />
-
-            {/* User Info with Dropdown */}
-            {user && (
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
-                >
-                  <UserIcon className="size-4" />
-                  <span className="hidden max-w-[150px] truncate md:inline">{user.email}</span>
-                  <ChevronDownIcon className={`size-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown Menu */}
-                {dropdownOpen && (
-                  <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-zinc-200 bg-white/95 p-2 shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95">
-                    {/* User Email in Dropdown */}
-                    <div className="mb-2 border-b border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">Signed in as</p>
-                      <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-50">{user.email}</p>
-                    </div>
-
-                    {/* Navigation Items */}
-                    <Link
-                      href="/tasks"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-green-50 dark:text-zinc-300 dark:hover:bg-green-950/30"
-                    >
-                      <CheckSquareIcon className="size-4 text-green-600 dark:text-green-400" />
-                      <span>Tasks</span>
-                    </Link>
-
-                    <Link
-                      href="/analytics"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-blue-50 dark:text-zinc-300 dark:hover:bg-blue-950/30"
-                    >
-                      <TrendingUpIcon className="size-4 text-blue-600 dark:text-blue-400" />
-                      <span>Analytics</span>
-                    </Link>
-
-                    <Link
-                      href="/templates"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-purple-50 dark:text-zinc-300 dark:hover:bg-purple-950/30"
-                    >
-                      <SparklesIcon className="size-4 text-purple-600 dark:text-purple-400" />
-                      <span>Templates</span>
-                    </Link>
-
-                    <Link
-                      href="/reports"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-amber-50 dark:text-zinc-300 dark:hover:bg-amber-950/30"
-                    >
-                      <FileTextIcon className="size-4 text-amber-600 dark:text-amber-400" />
-                      <span>Reports</span>
-                    </Link>
-
-                    <Link
-                      href="/settings"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-rose-50 dark:text-zinc-300 dark:hover:bg-rose-950/30"
-                    >
-                      <SettingsIcon className="size-4 text-rose-600 dark:text-rose-400" />
-                      <span>Settings</span>
-                    </Link>
-
-                    {/* Divider */}
-                    <div className="my-2 border-t border-zinc-200 dark:border-zinc-800" />
-
-                    {/* Actions */}
-                    <button
-                      onClick={() => {
-                        toggleTheme();
-                        setDropdownOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                    >
-                      {theme === "light" ? (
-                        <>
-                          <MoonIcon className="size-4 text-zinc-600 dark:text-zinc-400" />
-                          <span>Dark Mode</span>
-                        </>
-                      ) : (
-                        <>
-                          <SunIcon className="size-4 text-zinc-600 dark:text-zinc-400" />
-                          <span>Light Mode</span>
-                        </>
-                      )}
-                    </button>
-
-                    {messages.length > 0 && (
-                      <>
-                        <button
-                          onClick={() => {
-                            showExportPreview();
-                            setDropdownOpen(false);
-                          }}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-green-50 dark:text-zinc-300 dark:hover:bg-green-950/30"
-                        >
-                          <FileDownIcon className="size-4 text-green-600 dark:text-green-400" />
-                          <span>Export DOCX</span>
-                        </button>
-
-                        <button
-                          onClick={() => {
-                            clearChat();
-                            setDropdownOpen(false);
-                          }}
-                          className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
-                        >
-                          <Trash2Icon className="size-4" />
-                          <span>Clear Chat</span>
-                        </button>
-                      </>
-                    )}
-
-                    {/* Divider */}
-                    <div className="my-2 border-t border-zinc-200 dark:border-zinc-800" />
-
-                    {/* Sign Out */}
-                    <button
-                      onClick={() => {
-                        signOut();
-                        setDropdownOpen(false);
-                      }}
-                      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                    >
-                      <LogOutIcon className="size-4 text-zinc-600 dark:text-zinc-400" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+              <button
+                onClick={clearChat}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+              >
+                <Trash2Icon className="size-4" />
+                <span>Clear Chat</span>
+              </button>
+            </>
+          ) : undefined
+        }
+      />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
@@ -844,16 +647,16 @@ export default function Home() {
             sidebarOpen ? "translate-x-0 lg:static" : "-translate-x-full lg:-translate-x-full"
           } fixed inset-y-0 left-0 top-[85px] z-20 w-72 border-r border-zinc-200/60 bg-white/95 backdrop-blur-xl transition-transform duration-300 dark:border-zinc-800/60 dark:bg-zinc-900/95 lg:top-0`}
         >
-          <div className="flex h-full flex-col p-5">
+          <div className="flex h-full flex-col p-3">
             <button
               onClick={() => setHistoryExpanded(!historyExpanded)}
-              className="mb-6 flex items-center justify-between gap-2.5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-3 shadow-sm transition-all hover:shadow-md active:scale-[0.98] dark:from-blue-950/30 dark:to-indigo-950/30"
+              className="mb-4 flex items-center justify-between gap-2 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 px-3 py-2 shadow-sm transition-all hover:shadow-md active:scale-[0.98] dark:from-blue-950/30 dark:to-indigo-950/30"
             >
-              <div className="flex items-center gap-2.5">
-                <div className="rounded-lg bg-white p-2 shadow-sm dark:bg-zinc-800">
-                  <CalendarIcon className="size-5 text-blue-600 dark:text-blue-400" />
+              <div className="flex items-center gap-2">
+                <div className="rounded-lg bg-white p-1.5 shadow-sm dark:bg-zinc-800">
+                  <CalendarIcon className="size-4 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                <h2 className="text-base font-bold text-zinc-900 dark:text-zinc-50">
                   History
                 </h2>
               </div>
@@ -879,12 +682,12 @@ export default function Home() {
                       <button
                         key={dateInfo.dateKey}
                         onClick={() => scrollToDate(dateInfo.dateKey)}
-                        className="group flex w-full items-center justify-between rounded-xl bg-gradient-to-br from-zinc-50 to-zinc-100 px-4 py-3 text-left shadow-sm transition-all hover:scale-[1.02] hover:from-blue-50 hover:to-indigo-50 hover:shadow-md active:scale-[0.98] dark:from-zinc-800/50 dark:to-zinc-800/30 dark:hover:from-blue-950/30 dark:hover:to-indigo-950/30"
+                        className="group flex w-full items-center justify-between rounded-lg bg-gradient-to-br from-zinc-50 to-zinc-100 px-3 py-2 text-left shadow-sm transition-all hover:scale-[1.02] hover:from-blue-50 hover:to-indigo-50 hover:shadow-md active:scale-[0.98] dark:from-zinc-800/50 dark:to-zinc-800/30 dark:hover:from-blue-950/30 dark:hover:to-indigo-950/30"
                       >
-                        <span className="font-semibold text-zinc-700 transition-colors group-hover:text-blue-700 dark:text-zinc-300 dark:group-hover:text-blue-400">
+                        <span className="text-sm font-semibold text-zinc-700 transition-colors group-hover:text-blue-700 dark:text-zinc-300 dark:group-hover:text-blue-400">
                           {dateInfo.date}
                         </span>
-                        <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-zinc-600 shadow-sm transition-colors group-hover:bg-blue-100 group-hover:text-blue-700 dark:bg-zinc-700 dark:text-zinc-300 dark:group-hover:bg-blue-900/50 dark:group-hover:text-blue-300">
+                        <span className="rounded-full bg-white px-2 py-0.5 text-xs font-bold text-zinc-600 shadow-sm transition-colors group-hover:bg-blue-100 group-hover:text-blue-700 dark:bg-zinc-700 dark:text-zinc-300 dark:group-hover:bg-blue-900/50 dark:group-hover:text-blue-300">
                           {dateInfo.count}
                         </span>
                       </button>
@@ -1111,7 +914,7 @@ export default function Home() {
           </div>
         ) : (
           /* Summary View */
-          <div className="flex-1 overflow-y-auto p-6">
+          <div className="flex-1 overflow-y-auto p-4">
             {/* Period Toggle */}
             <div className="mb-6 flex justify-center">
               <div className="inline-flex gap-1 rounded-xl bg-zinc-100 p-1 dark:bg-zinc-800">
@@ -1211,7 +1014,7 @@ export default function Home() {
             </div>
 
             {/* Modal Content - Scrollable */}
-            <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+            <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(90vh - 180px)' }}>
               {/* Report Header Preview */}
               <div className="mb-6 text-center">
                 <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-zinc-50">

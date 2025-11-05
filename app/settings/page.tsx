@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase'
-import { ArrowLeftIcon, UserIcon, SaveIcon, Loader2Icon, BellIcon, MonitorIcon, ZoomInIcon, ZoomOutIcon, MaximizeIcon, TrashIcon, AlertTriangleIcon } from 'lucide-react'
+import { UserIcon, SaveIcon, Loader2Icon, BellIcon, MonitorIcon, ZoomInIcon, ZoomOutIcon, MaximizeIcon, TrashIcon, AlertTriangleIcon } from 'lucide-react'
 import Link from 'next/link'
+import { AppHeader } from '@/components/app-header'
 import { useUISize, type UISize } from '@/contexts/ui-size-context'
 
 interface UserProfile {
@@ -315,72 +316,68 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
-      <div className="mx-auto max-w-7xl px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="group mb-6 inline-flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
-          >
-            <ArrowLeftIcon className="size-4 transition-transform group-hover:-translate-x-1" />
-            Back to Dashboard
-          </Link>
-          <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
-            Settings
-          </h1>
-          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-            Manage your profile and account preferences
-          </p>
-        </div>
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+      <AppHeader />
+
+      <div className="flex-1 overflow-y-auto px-3 py-6">
+        <div className="mx-auto max-w-7xl">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
+              Settings
+            </h1>
+            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              Manage your profile and account preferences
+            </p>
+          </div>
 
         {/* Layout with Sidebar */}
-        <div className="flex gap-8">
+        <div className="flex gap-6">
           {/* Sidebar */}
-          <aside className="w-64 shrink-0">
-            <nav className="sticky top-8 space-y-1 rounded-2xl border border-zinc-200 bg-white/80 p-3 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+          <aside className="w-56 shrink-0">
+            <nav className="sticky top-8 space-y-1 rounded-xl border border-zinc-200 bg-white/80 p-2 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
               <button
                 onClick={() => setActiveSection('profile')}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all ${
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
                   activeSection === 'profile'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <UserIcon className="size-5" />
+                <UserIcon className="size-4" />
                 Profile
               </button>
               <button
                 onClick={() => setActiveSection('appearance')}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all ${
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
                   activeSection === 'appearance'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <MonitorIcon className="size-5" />
+                <MonitorIcon className="size-4" />
                 Appearance
               </button>
               <button
                 onClick={() => setActiveSection('notifications')}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all ${
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
                   activeSection === 'notifications'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <BellIcon className="size-5" />
+                <BellIcon className="size-4" />
                 Notifications
               </button>
               <button
                 onClick={() => setActiveSection('account')}
-                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-all ${
+                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
                   activeSection === 'account'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <AlertTriangleIcon className="size-5" />
+                <AlertTriangleIcon className="size-4" />
                 Account
               </button>
             </nav>
@@ -390,46 +387,46 @@ export default function SettingsPage() {
           <main className="flex-1">
             {/* Success/Error Messages */}
             {success && (
-              <div className="mb-6 rounded-xl bg-green-50 p-4 text-sm text-green-600 dark:bg-green-950/50 dark:text-green-400">
+              <div className="mb-4 rounded-lg bg-green-50 p-3 text-sm text-green-600 dark:bg-green-950/50 dark:text-green-400">
                 Settings updated successfully!
               </div>
             )}
             {error && (
-              <div className="mb-6 rounded-xl bg-red-50 p-4 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-400">
+              <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-950/50 dark:text-red-400">
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
               {/* Profile Section */}
               {activeSection === 'profile' && (
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="rounded-xl bg-gradient-to-br from-rose-400 to-orange-400 p-3">
-                      <UserIcon className="size-6 text-white" />
+                <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+                  <div className="mb-4 flex items-center gap-2">
+                    <div className="rounded-lg bg-gradient-to-br from-rose-400 to-orange-400 p-2">
+                      <UserIcon className="size-5 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                      <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
                         Profile Information
                       </h2>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400">
                         Update your personal details and information
                       </p>
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="space-y-4">
 
               {/* Email (Read-only) */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Email Address
                 </label>
                 <input
                   type="email"
                   value={user?.email || ''}
                   disabled
-                  className="w-full rounded-xl border border-zinc-300 bg-zinc-100 px-4 py-3 text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
+                  className="w-full rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-500"
                 />
                 <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                   Email cannot be changed
@@ -438,7 +435,7 @@ export default function SettingsPage() {
 
               {/* Full Name */}
               <div>
-                <label htmlFor="full_name" className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label htmlFor="full_name" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Full Name
                 </label>
                 <input
@@ -447,13 +444,13 @@ export default function SettingsPage() {
                   value={profile.full_name || ''}
                   onChange={(e) => setProfile({ ...profile, full_name: e.target.value })}
                   placeholder="John Doe"
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
                 />
               </div>
 
               {/* Job Title */}
               <div>
-                <label htmlFor="job_title" className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label htmlFor="job_title" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Job Title
                 </label>
                 <input
@@ -462,13 +459,13 @@ export default function SettingsPage() {
                   value={profile.job_title || ''}
                   onChange={(e) => setProfile({ ...profile, job_title: e.target.value })}
                   placeholder="Software Engineer"
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
                 />
               </div>
 
               {/* Company */}
               <div>
-                <label htmlFor="company" className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label htmlFor="company" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Company
                 </label>
                 <input
@@ -477,7 +474,7 @@ export default function SettingsPage() {
                   value={profile.company || ''}
                   onChange={(e) => setProfile({ ...profile, company: e.target.value })}
                   placeholder="Acme Inc."
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
                 />
               </div>
 
@@ -492,7 +489,7 @@ export default function SettingsPage() {
                   value={profile.avatar_url || ''}
                   onChange={(e) => setProfile({ ...profile, avatar_url: e.target.value })}
                   placeholder="https://example.com/avatar.jpg"
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
                 />
                 <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
                   Enter a URL to your profile picture
@@ -501,7 +498,7 @@ export default function SettingsPage() {
 
               {/* Bio */}
               <div>
-                <label htmlFor="bio" className="mb-2 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                <label htmlFor="bio" className="mb-1 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
                   Bio
                 </label>
                 <textarea
@@ -510,7 +507,7 @@ export default function SettingsPage() {
                   onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                   placeholder="Tell us about yourself..."
                   rows={4}
-                  className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
+                  className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
                 />
               </div>
                   </div>
@@ -519,16 +516,16 @@ export default function SettingsPage() {
 
               {/* Appearance Section */}
               {activeSection === 'appearance' && (
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="rounded-xl bg-gradient-to-br from-purple-400 to-pink-400 p-3">
-                    <MonitorIcon className="size-6 text-white" />
+                <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+                <div className="mb-4 flex items-center gap-2">
+                  <div className="rounded-lg bg-gradient-to-br from-purple-400 to-pink-400 p-2">
+                    <MonitorIcon className="size-5 text-white" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
                       UI Appearance
                     </h3>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400">
                       Customize the interface size and density
                     </p>
                   </div>
@@ -667,16 +664,16 @@ export default function SettingsPage() {
 
               {/* Notifications Section */}
               {activeSection === 'notifications' && (
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-                <div className="mb-6 flex items-center gap-3">
-                  <div className="rounded-xl bg-gradient-to-br from-blue-400 to-cyan-400 p-3">
-                    <BellIcon className="size-6 text-white" />
+                <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+                <div className="mb-4 flex items-center gap-2">
+                  <div className="rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 p-2">
+                    <BellIcon className="size-5 text-white" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
                       Notifications & Reminders
                     </h3>
-                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    <p className="text-xs text-zinc-600 dark:text-zinc-400">
                       Configure when and how you want to be reminded
                     </p>
                   </div>
@@ -716,7 +713,7 @@ export default function SettingsPage() {
                           type="time"
                           value={preferences.reminder_time}
                           onChange={(e) => setPreferences({ ...preferences, reminder_time: e.target.value })}
-                          className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
+                          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
                         />
                       </div>
 
@@ -806,16 +803,16 @@ export default function SettingsPage() {
 
               {/* Account Section */}
               {activeSection === 'account' && (
-                <div className="rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-                  <div className="mb-6 flex items-center gap-3">
-                    <div className="rounded-xl bg-gradient-to-br from-red-400 to-rose-400 p-3">
-                      <AlertTriangleIcon className="size-6 text-white" />
+                <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+                  <div className="mb-4 flex items-center gap-2">
+                    <div className="rounded-lg bg-gradient-to-br from-red-400 to-rose-400 p-2">
+                      <AlertTriangleIcon className="size-5 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+                      <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
                         Account Management
                       </h2>
-                      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      <p className="text-xs text-zinc-600 dark:text-zinc-400">
                         Manage dangerous account actions
                       </p>
                     </div>
@@ -823,7 +820,7 @@ export default function SettingsPage() {
 
                   {/* Delete Account Section */}
                   <div className="space-y-4">
-                    <div className="rounded-xl border-2 border-red-200 bg-red-50 p-6 dark:border-red-900 dark:bg-red-950/30">
+                    <div className="rounded-lg border-2 border-red-200 bg-red-50 p-4 dark:border-red-900 dark:bg-red-950/30">
                       <div className="mb-4 flex items-start gap-3">
                         <TrashIcon className="size-6 text-red-600 dark:text-red-400" />
                         <div>
@@ -928,6 +925,7 @@ export default function SettingsPage() {
           </main>
         </div>
       </div>
+    </div>
     </div>
   )
 }

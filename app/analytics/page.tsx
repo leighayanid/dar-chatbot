@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase'
-import { ArrowLeftIcon, TrendingUpIcon, CalendarIcon, MessageSquareIcon, TargetIcon, Loader2Icon } from 'lucide-react'
-import Link from 'next/link'
+import { TrendingUpIcon, CalendarIcon, MessageSquareIcon, TargetIcon, Loader2Icon, ClockIcon, BarChart3Icon } from 'lucide-react'
+import { AppHeader } from '@/components/app-header'
+import { LineChart } from '@/components/charts/line-chart'
+import { BarChart } from '@/components/charts/bar-chart'
 
 interface ActivityData {
   date: string
@@ -24,11 +27,24 @@ interface Stats {
   thisMonth: number
 }
 
+interface TimePattern {
+  hour: number
+  count: number
+}
+
+interface DayPattern {
+  day: string
+  count: number
+  dayIndex: number
+}
+
 export default function AnalyticsPage() {
   const { user, loading: authLoading } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [activityData, setActivityData] = useState<ActivityData[]>([])
+  const [timePatterns, setTimePatterns] = useState<TimePattern[]>([])
+  const [dayPatterns, setDayPatterns] = useState<DayPattern[]>([])
   const [stats, setStats] = useState<Stats>({
     totalMessages: 0,
     totalDays: 0,
@@ -118,6 +134,34 @@ export default function AnalyticsPage() {
             lastWeek,
             thisMonth,
           })
+
+          // Calculate time of day patterns
+          const timeMap = new Map<number, number>()
+          messages.forEach((msg: any) => {
+            const hour = new Date(msg.created_at).getHours()
+            timeMap.set(hour, (timeMap.get(hour) || 0) + 1)
+          })
+
+          const timePatternsData: TimePattern[] = []
+          for (let i = 0; i < 24; i++) {
+            timePatternsData.push({ hour: i, count: timeMap.get(i) || 0 })
+          }
+          setTimePatterns(timePatternsData)
+
+          // Calculate day of week patterns
+          const dayMap = new Map<number, number>()
+          messages.forEach((msg: any) => {
+            const dayIndex = new Date(msg.created_at).getDay()
+            dayMap.set(dayIndex, (dayMap.get(dayIndex) || 0) + 1)
+          })
+
+          const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+          const dayPatternsData: DayPattern[] = dayNames.map((day, index) => ({
+            day,
+            dayIndex: index,
+            count: dayMap.get(index) || 0,
+          }))
+          setDayPatterns(dayPatternsData)
         }
       } catch (err) {
         console.error('Error loading analytics:', err)
@@ -229,36 +273,32 @@ export default function AnalyticsPage() {
   const weeklyChange = stats.lastWeek > 0 ? ((stats.thisWeek - stats.lastWeek) / stats.lastWeek) * 100 : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100 p-4 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
-      <div className="mx-auto max-w-7xl py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="group mb-6 inline-flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
-          >
-            <ArrowLeftIcon className="size-4 transition-transform group-hover:-translate-x-1" />
-            Back to Dashboard
-          </Link>
-          <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
-            Analytics Dashboard
-          </h1>
-          <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-            Track your productivity and accomplishment patterns
-          </p>
-        </div>
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+      <AppHeader />
+
+      <div className="flex-1 overflow-y-auto p-3">
+        <div className="mx-auto max-w-7xl py-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
+              Analytics Dashboard
+            </h1>
+            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+              Track your productivity and accomplishment patterns
+            </p>
+          </div>
 
         {/* Stats Grid */}
-        <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* Total Messages */}
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <div className="mb-2 flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-blue-400 to-cyan-400 p-3">
-                <MessageSquareIcon className="size-5 text-white" />
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-4 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 p-2">
+                <MessageSquareIcon className="size-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Entries</p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{stats.totalMessages}</p>
+                <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Total Entries</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{stats.totalMessages}</p>
               </div>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -267,14 +307,14 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Current Streak */}
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <div className="mb-2 flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-rose-400 to-orange-400 p-3">
-                <TargetIcon className="size-5 text-white" />
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-4 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-rose-400 to-orange-400 p-2">
+                <TargetIcon className="size-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Current Streak</p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{stats.currentStreak}</p>
+                <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Current Streak</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{stats.currentStreak}</p>
               </div>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -283,14 +323,14 @@ export default function AnalyticsPage() {
           </div>
 
           {/* This Week */}
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <div className="mb-2 flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-green-400 to-emerald-400 p-3">
-                <CalendarIcon className="size-5 text-white" />
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-4 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-green-400 to-emerald-400 p-2">
+                <CalendarIcon className="size-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">This Week</p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{stats.thisWeek}</p>
+                <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">This Week</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{stats.thisWeek}</p>
               </div>
             </div>
             <p className={`text-xs ${weeklyChange >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
@@ -299,14 +339,14 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Average Per Day */}
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <div className="mb-2 flex items-center gap-3">
-              <div className="rounded-xl bg-gradient-to-br from-purple-400 to-pink-400 p-3">
-                <TrendingUpIcon className="size-5 text-white" />
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-4 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-2 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-purple-400 to-pink-400 p-2">
+                <TrendingUpIcon className="size-4 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">Daily Average</p>
-                <p className="text-3xl font-bold text-zinc-900 dark:text-zinc-50">{stats.averagePerDay.toFixed(1)}</p>
+                <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Daily Average</p>
+                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{stats.averagePerDay.toFixed(1)}</p>
               </div>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">
@@ -316,11 +356,11 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Activity Heatmap */}
-        <div className="mb-8 rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-          <h2 className="mb-6 text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+        <div className="mb-6 rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+          <h2 className="mb-4 text-xl font-bold text-zinc-900 dark:text-zinc-50">
             Activity Heatmap
           </h2>
-          <p className="mb-6 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
             Your activity over the past year
           </p>
 
@@ -351,7 +391,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Legend */}
-          <div className="mt-6 flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
+          <div className="mt-4 flex items-center gap-2 text-xs text-zinc-600 dark:text-zinc-400">
             <span>Less</span>
             <div className="flex gap-1">
               <div className="size-3 rounded-sm bg-zinc-100 dark:bg-zinc-800" />
@@ -364,11 +404,134 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
+        {/* Charts Section */}
+        <div className="mb-6 grid gap-4 lg:grid-cols-2">
+          {/* 30-Day Trend */}
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 p-2">
+                <TrendingUpIcon className="size-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  30-Day Trend
+                </h2>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  Daily entry count
+                </p>
+              </div>
+            </div>
+            <LineChart
+              data={activityData.slice(-30).map(d => ({
+                label: new Date(d.date).getDate().toString(),
+                value: d.count,
+              }))}
+              color="rgb(59, 130, 246)"
+              height={200}
+            />
+          </div>
+
+          {/* Day of Week Pattern */}
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-green-400 to-emerald-400 p-2">
+                <CalendarIcon className="size-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  Day of Week
+                </h2>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  Activity by weekday
+                </p>
+              </div>
+            </div>
+            <BarChart
+              data={dayPatterns.map(d => ({
+                label: d.day.slice(0, 3),
+                value: d.count,
+                color: 'linear-gradient(to right, rgb(34, 197, 94), rgb(16, 185, 129))',
+              }))}
+              height={200}
+            />
+          </div>
+
+          {/* Time of Day Pattern */}
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-purple-400 to-pink-400 p-2">
+                <ClockIcon className="size-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  Time of Day
+                </h2>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  When you're most active
+                </p>
+              </div>
+            </div>
+            <LineChart
+              data={timePatterns.map(t => ({
+                label: `${t.hour}:00`,
+                value: t.count,
+              }))}
+              color="rgb(168, 85, 247)"
+              height={200}
+            />
+            {timePatterns.length > 0 && (
+              <div className="mt-3 rounded-lg bg-purple-50 p-3 dark:bg-purple-950/30">
+                <p className="text-sm font-medium text-purple-900 dark:text-purple-200">
+                  Peak hour:{' '}
+                  <span className="font-bold">
+                    {timePatterns.reduce((max, t) => (t.count > max.count ? t : max), timePatterns[0]).hour}:00
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Word Count Trend */}
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-4 flex items-center gap-2">
+              <div className="rounded-lg bg-gradient-to-br from-orange-400 to-red-400 p-2">
+                <BarChart3Icon className="size-5 text-white" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  Word Count
+                </h2>
+                <p className="text-xs text-zinc-600 dark:text-zinc-400">
+                  Last 30 days
+                </p>
+              </div>
+            </div>
+            <LineChart
+              data={activityData.slice(-30).map(d => ({
+                label: new Date(d.date).getDate().toString(),
+                value: d.words,
+              }))}
+              color="rgb(249, 115, 22)"
+              height={200}
+            />
+            {activityData.length > 0 && (
+              <div className="mt-3 rounded-lg bg-orange-50 p-3 dark:bg-orange-950/30">
+                <p className="text-sm font-medium text-orange-900 dark:text-orange-200">
+                  Avg words/day:{' '}
+                  <span className="font-bold">
+                    {Math.round(activityData.reduce((sum, d) => sum + d.words, 0) / activityData.length)}
+                  </span>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
         {/* Additional Stats */}
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-2">
           {/* Recent Activity */}
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <h2 className="mb-4 text-xl font-bold text-zinc-900 dark:text-zinc-50">
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <h2 className="mb-3 text-lg font-bold text-zinc-900 dark:text-zinc-50">
               Recent Activity
             </h2>
             <div className="space-y-3">
@@ -426,6 +589,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+    </div>
     </div>
   )
 }

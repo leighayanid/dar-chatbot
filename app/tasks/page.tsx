@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase'
 import {
-  ArrowLeftIcon,
   PlusIcon,
   Loader2Icon,
   CheckCircle2Icon,
@@ -17,7 +16,7 @@ import {
   TagIcon,
   XIcon
 } from 'lucide-react'
-import Link from 'next/link'
+import { AppHeader } from '@/components/app-header'
 
 interface Task {
   id: string
@@ -238,35 +237,31 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-50 via-white to-zinc-100 p-4 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
-      <div className="mx-auto max-w-7xl py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <Link
-            href="/dashboard"
-            className="group mb-6 inline-flex items-center gap-2 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
-          >
-            <ArrowLeftIcon className="size-4 transition-transform group-hover:-translate-x-1" />
-            Back to Dashboard
-          </Link>
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
-                Tasks & Todos
-              </h1>
-              <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-                Manage your daily tasks and track your progress
-              </p>
+    <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+      <AppHeader />
+
+      <div className="flex-1 overflow-y-auto p-4">
+        <div className="mx-auto max-w-7xl py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
+                  Tasks & Todos
+                </h1>
+                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Manage your daily tasks and track your progress
+                </p>
+              </div>
+              <button
+                onClick={() => setShowModal(true)}
+                className="group rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+              >
+                <PlusIcon className="mr-2 inline size-5" />
+                New Task
+              </button>
             </div>
-            <button
-              onClick={() => setShowModal(true)}
-              className="group rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
-            >
-              <PlusIcon className="mr-2 inline size-5" />
-              New Task
-            </button>
           </div>
-        </div>
 
         {/* Stats */}
         <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -406,6 +401,7 @@ export default function TasksPage() {
             ))}
           </div>
         )}
+        </div>
       </div>
 
       {/* Create/Edit Modal */}

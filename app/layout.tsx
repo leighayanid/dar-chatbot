@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { TeamProvider } from "@/lib/teams/team-context";
 import { UISizeProvider } from "@/contexts/ui-size-context";
+import { ThemeProvider } from "@/lib/theme/theme-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,11 +31,13 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <UISizeProvider>
-          <AuthProvider>
-            <TeamProvider>{children}</TeamProvider>
-          </AuthProvider>
-        </UISizeProvider>
+        <ThemeProvider>
+          <UISizeProvider>
+            <AuthProvider>
+              <TeamProvider>{children}</TeamProvider>
+            </AuthProvider>
+          </UISizeProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
