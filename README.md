@@ -8,11 +8,16 @@ A modern web application for tracking and reflecting on daily accomplishments, p
 - **Real-time Streaming**: See AI responses as they're generated
 - **User Authentication**: Secure sign-up and login with Supabase Auth
 - **User Profiles**: Manage your personal information and account settings
+- **Universal Navigation**: Consistent header with logo, team switcher, and user menu across all pages
+- **Team Management**: Create teams, invite members, and manage team settings
 - **Data Persistence**: All conversations and messages are saved to your database
 - **Chat History**: Browse and navigate through your previous conversations by date
 - **Export Reports**: Export your accomplishment reports as DOCX files
+- **Task Management**: Create, track, and organize your daily tasks
+- **Templates & Prompts**: Use pre-built templates or create custom ones
+- **Analytics Dashboard**: Track your productivity with detailed charts and insights
 - **Modern Design**: Beautiful warm pastel color scheme with smooth animations
-- **Dark Mode Support**: Comfortable viewing in any lighting condition
+- **Dark Mode Support**: Comfortable viewing in any lighting condition with persistent theme preference
 - **Responsive Layout**: Works seamlessly on desktop and mobile devices
 
 ## Tech Stack
@@ -98,26 +103,47 @@ npm run dev
 dar-app/
 ├── app/
 │   ├── api/
-│   │   └── chat/
-│   │       └── route.ts       # AI chat API endpoint
+│   │   ├── chat/
+│   │   │   └── route.ts       # AI chat API endpoint
+│   │   ├── teams/            # Team management endpoints
+│   │   └── export-report/    # Report export endpoint
+│   ├── analytics/
+│   │   └── page.tsx          # Analytics dashboard
 │   ├── dashboard/
 │   │   └── page.tsx          # Main chat interface
 │   ├── login/
 │   │   └── page.tsx          # Login page
 │   ├── register/
 │   │   └── page.tsx          # Registration page
+│   ├── reports/
+│   │   └── page.tsx          # Reports page
 │   ├── settings/
 │   │   └── page.tsx          # User settings and profile
+│   ├── tasks/
+│   │   └── page.tsx          # Task management
+│   ├── teams/
+│   │   └── [id]/settings/
+│   │       └── page.tsx      # Team settings
+│   ├── templates/
+│   │   └── page.tsx          # Template management
 │   ├── globals.css           # Global styles
-│   ├── layout.tsx            # Root layout
+│   ├── layout.tsx            # Root layout with providers
 │   └── page.tsx              # Landing page
 ├── components/
 │   ├── ai-elements/          # AI Elements components
 │   ├── ui/                   # shadcn/ui components
-│   └── theme-toggle.tsx      # Dark mode toggle
+│   ├── app-header.tsx        # Universal app header
+│   ├── logo.tsx              # App logo component
+│   └── team-switcher.tsx     # Team switcher dropdown
+├── contexts/
+│   └── ui-size-context.tsx   # UI size preferences
 ├── lib/
 │   ├── auth/
 │   │   └── auth-context.tsx  # Authentication context
+│   ├── teams/
+│   │   └── team-context.tsx  # Team management context
+│   ├── theme/
+│   │   └── theme-context.tsx # Theme provider (dark/light mode)
 │   ├── supabase/
 │   │   ├── client.ts         # Client-side Supabase client
 │   │   ├── server.ts         # Server-side Supabase client
@@ -163,16 +189,93 @@ dar-app/
 
 All tables have Row Level Security (RLS) enabled, ensuring users can only access their own data.
 
+## Universal Navigation (AppHeader)
+
+The application features a universal header component that provides consistent navigation across all authenticated pages:
+
+### Features
+
+- **Logo**: Clickable logo that links back to the dashboard
+- **Team Switcher**: Dropdown to switch between teams (when applicable)
+- **User Menu**: Comprehensive dropdown menu with:
+  - Quick navigation to Tasks, Analytics, Templates, Reports, and Settings
+  - Active route highlighting
+  - Theme toggle (Light/Dark mode)
+  - Sign out option
+- **Flexible Design**: Supports optional center content and actions through composition
+- **Responsive**: Works seamlessly on mobile and desktop
+
+### Implementation
+
+The AppHeader component (`components/app-header.tsx`) is used across all main pages:
+- Dashboard (with custom view tabs and export/clear actions)
+- Analytics
+- Tasks
+- Templates
+- Reports
+- Settings
+- Team Settings
+
+### Theme Management
+
+The app uses a centralized `ThemeProvider` (`lib/theme/theme-context.tsx`) that:
+- Persists theme preference in localStorage
+- Respects system preference on first load
+- Provides dark mode support throughout the app
+- Accessible from the user menu in the AppHeader
+
 ## How It Works
 
 1. **Authentication**: Users sign up and log in through Supabase Auth
 2. **Middleware Protection**: The `proxy.ts` middleware protects routes and manages session cookies
-3. **Chat Interface**: The dashboard uses AI SDK's `useChat` hook to manage chat state
-4. **AI Streaming**: Messages are sent to `/api/chat` which streams responses from Claude
-5. **Data Persistence**: All messages and conversations are automatically saved to Supabase
-6. **User Profiles**: Users can manage their profile information in the settings page
+3. **Root Layout**: The app uses multiple context providers for auth, teams, theme, and UI preferences
+4. **Universal Navigation**: The AppHeader component provides consistent navigation across all pages
+5. **Chat Interface**: The dashboard uses AI SDK's `useChat` hook to manage chat state
+6. **AI Streaming**: Messages are sent to `/api/chat` which streams responses from Claude
+7. **Data Persistence**: All messages and conversations are automatically saved to Supabase
+8. **Team Management**: Users can create teams, invite members, and manage team settings
+9. **User Profiles**: Users can manage their profile information in the settings page
 
 ## Customization
+
+### Universal Header (AppHeader)
+
+The AppHeader component supports customization through props:
+
+```typescript
+<AppHeader
+  children={
+    // Optional center content (e.g., view tabs, breadcrumbs)
+    <div>Your custom center content</div>
+  }
+  actions={
+    // Optional actions for the user dropdown menu
+    <>
+      <button>Custom Action</button>
+    </>
+  }
+/>
+```
+
+Example from the dashboard:
+```typescript
+<AppHeader
+  children={
+    // View toggle tabs for Chat/Summary
+    <div className="flex items-center gap-1">
+      <button onClick={() => setViewMode("chat")}>Chat</button>
+      <button onClick={() => setViewMode("summary")}>Summary</button>
+    </div>
+  }
+  actions={
+    // Export and Clear Chat buttons
+    <>
+      <button onClick={showExportPreview}>Export DOCX</button>
+      <button onClick={clearChat}>Clear Chat</button>
+    </>
+  }
+/>
+```
 
 ### Changing the AI Model
 
@@ -187,6 +290,13 @@ model: anthropic("claude-3-5-sonnet-20241022")
 ### Modifying the System Prompt
 
 Edit the `system` property in [app/api/chat/route.ts](app/api/chat/route.ts) to change how the AI assistant behaves.
+
+### Theme Customization
+
+The theme is managed by `ThemeProvider` in [lib/theme/theme-context.tsx](lib/theme/theme-context.tsx). To customize:
+- Dark mode styles use the `dark:` Tailwind prefix
+- Theme preference is persisted in localStorage (`dar-theme` key)
+- System preference is detected on first load
 
 ### Styling
 
@@ -207,26 +317,60 @@ supabase db reset  # Apply the migration locally
 
 ## Features to Implement
 
+### Completed Features ✅
+
+- [x] **Task/Todo Management**
+  - Daily task tracking functionality
+  - Create, edit, and mark tasks as complete
+  - Task prioritization (low, medium, high)
+  - Task categories (work, personal, health, learning, other)
+  - Due dates and task statistics
+
+- [x] **Reporting**
+  - Weekly and monthly accomplishment summaries
+  - DOCX export functionality
+  - Progress tracking over time
+
+- [x] **Team Features**
+  - Create and manage teams
+  - Invite team members via email
+  - Team settings and member management
+  - Role-based permissions (owner, admin, member, viewer)
+
+- [x] **Analytics Dashboard**
+  - Activity heatmap
+  - 30-day trend charts
+  - Day of week patterns
+  - Time of day analysis
+  - Word count tracking
+  - Productivity metrics
+
+- [x] **Templates & Prompts**
+  - Pre-built system templates
+  - Custom template creation
+  - Template categories
+  - Template sharing
+
 ### Priority Features
 
-- [ ] **Task/Todo Management**
-  - Add daily task tracking functionality
-  - Allow users to create, edit, and mark tasks as complete
-  - Integrate tasks with accomplishment reports
-  - AI suggestions for task breakdown and prioritization
-  - Daily task summary and completion statistics
+- [ ] **Enhanced Analytics**
+  - AI-powered insights and recommendations
+  - Goal progress visualization
+  - Team analytics and leaderboards
+  - Custom date range reports
 
-- [ ] **Enhanced Reporting**
-  - Weekly and monthly accomplishment summaries
-  - Progress tracking over time
-  - Custom report templates
-  - PDF export in addition to DOCX
+- [ ] **AI Enhancements**
+  - AI suggestions for task breakdown
+  - AI-powered goal recommendations
+  - Smart template suggestions
+  - Automated weekly summaries via email
 
-- [ ] **Team Features**
+- [ ] **Team Collaboration**
   - Share accomplishments with team members
-  - Team dashboards and analytics
+  - Team dashboards
   - Manager review and feedback
   - Team accomplishment aggregation
+  - Comments and reactions
 
 ### Future Enhancements
 
