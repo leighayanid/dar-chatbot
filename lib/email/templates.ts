@@ -1,5 +1,6 @@
 import { render } from '@react-email/components'
 import DailyReminderEmail from '@/emails/daily-reminder'
+import WeeklySummaryEmail from '@/emails/weekly-summary'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
@@ -56,21 +57,66 @@ Manage your preferences: ${settingsUrl}
 }
 
 /**
- * Render weekly summary email (placeholder for Phase 2)
+ * Render weekly summary email
  */
 export function renderWeeklySummaryEmail(params: {
   userName?: string
   userEmail: string
   weekData: {
+    startDate: string
+    endDate: string
     totalEntries: number
     activeDays: number
+    totalDays: number
     highlights: string[]
+    aiSummary: string
   }
 }) {
-  // TODO: Implement in Phase 2
+  const { userName, userEmail, weekData } = params
+
+  const reportsUrl = `${APP_URL}/reports`
+  const settingsUrl = `${APP_URL}/settings`
+
+  // Render React component to HTML
+  const html = render(
+    WeeklySummaryEmail({
+      userName: userName || userEmail.split('@')[0],
+      weekData,
+      reportsUrl,
+      settingsUrl,
+    })
+  )
+
+  // Plain text version
+  const text = `
+Hi ${userName || 'there'}!
+
+Here's your weekly accomplishment summary for ${weekData.startDate} to ${weekData.endDate}:
+
+📊 Your Stats:
+- Total Entries: ${weekData.totalEntries}
+- Active Days: ${weekData.activeDays}/${weekData.totalDays}
+- Consistency: ${Math.round((weekData.activeDays / weekData.totalDays) * 100)}%
+
+✨ AI Summary:
+${weekData.aiSummary}
+
+🌟 Highlights from Your Week:
+${weekData.highlights.map((h, i) => `${i + 1}. ${h}`).join('\n')}
+
+View your full report: ${reportsUrl}
+
+---
+
+You're receiving this email because you enabled weekly summaries in your DAR settings.
+Manage your preferences: ${settingsUrl}
+
+© ${new Date().getFullYear()} DAR App. All rights reserved.
+  `.trim()
+
   return {
-    html: '<p>Weekly summary coming soon!</p>',
-    text: 'Weekly summary coming soon!',
+    html,
+    text,
     subject: '📊 Your Weekly Accomplishments Summary',
   }
 }

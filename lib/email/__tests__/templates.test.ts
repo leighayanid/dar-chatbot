@@ -54,20 +54,31 @@ describe('Email Templates', () => {
   })
 
   describe('renderWeeklySummaryEmail', () => {
-    it('should render weekly summary placeholder', () => {
+    it('should render weekly summary with all data', () => {
       const result = renderWeeklySummaryEmail({
         userName: 'John Doe',
         userEmail: 'john@example.com',
         weekData: {
+          startDate: 'Oct 28, 2025',
+          endDate: 'Nov 4, 2025',
           totalEntries: 5,
           activeDays: 3,
+          totalDays: 7,
           highlights: ['Achievement 1', 'Achievement 2'],
+          aiSummary: 'Great progress this week!',
         },
       })
 
       expect(result.subject).toBe('📊 Your Weekly Accomplishments Summary')
-      expect(result.html).toContain('Weekly summary coming soon')
-      expect(result.text).toContain('Weekly summary coming soon')
+      expect(result.html).toBeTruthy()
+      expect(result.text).toContain('John Doe')
+      expect(result.text).toContain('Oct 28, 2025')
+      expect(result.text).toContain('Nov 4, 2025')
+      expect(result.text).toContain('Total Entries: 5')
+      expect(result.text).toContain('Active Days: 3/7')
+      expect(result.text).toContain('Great progress this week!')
+      expect(result.text).toContain('Achievement 1')
+      expect(result.text).toContain('Achievement 2')
     })
   })
 

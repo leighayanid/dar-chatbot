@@ -211,3 +211,184 @@ export async function getReminderStats() {
     return null
   }
 }
+
+// ===== Weekly Summary Functions =====
+
+export interface UserForWeeklySummary {
+  id: string
+  email: string
+  full_name?: string
+  timezone: string
+}
+
+export interface WeeklyData {
+  startDate: string
+  endDate: string
+  totalEntries: number
+  activeDays: number
+  totalDays: number
+  userMessages: string[]
+}
+
+/**
+ * Get users who should receive weekly summaries
+ * Called once per week (e.g., Sunday evening)
+ */
+export async function getUsersForWeeklySummary(): Promise<UserForWeeklySummary[]> {
+  try {
+    // Get all users with weekly summaries enabled
+    const { data: preferences, error } = await supabaseServer
+      .from('user_preferences')
+      .select('id, email_weekly_summary, timezone')
+      .eq('email_weekly_summary', true)
+
+    if (error) {
+      console.error('Error fetching user preferences for weekly summary:', error)
+      return []
+    }
+
+    if (!preferences || preferences.length === 0) {
+      return []
+    }
+
+    type WeeklyPreference = {
+      id: string
+      email_weekly_summary: boolean | null
+      timezone: string | null
+    }
+
+    type UserProfile = {
+      full_name: string | null
+    }
+
+    const usersWithDetails: UserForWeeklySummary[] = []
+
+    for (const pref of (preferences as WeeklyPreference[])) {
+      // Get user email from auth
+      const { data: authUser } = await supabaseServer.auth.admin.getUserById(pref.id)
+      if (!authUser.user?.email) continue
+
+      // Get user profile
+      const { data: profile } = await supabaseServer
+        .from('user_profiles')
+        .select('full_name')
+        .eq('id', pref.id)
+        .single()
+
+      usersWithDetails.push({
+        id: pref.id,
+        email: authUser.user.email,
+        full_name: (profile as UserProfile | null)?.full_name || undefined,
+        timezone: pref.timezone || 'UTC',
+      })
+    }
+
+    return usersWithDetails
+  } catch (error) {
+    console.error('Error in getUsersForWeeklySummary:', error)
+    return []
+  }
+}
+
+/**
+ * Get weekly accomplishment data for a specific user
+ * Aggregates data from the past 7 days
+ */
+export async function getWeeklyDataForUser(userId: string): Promise<WeeklyData | null> {
+  try {
+    // Calculate date range (last 7 days)
+    const endDate = new Date()
+    const startDate = new Date(endDate)
+    startDate.setDate(startDate.getDate() - 7)
+
+    // Format dates for display
+    const formatDate = (date: Date) => {
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      })
+    }
+
+    // Get all user messages from the past 7 days
+    const { data: messages, error } = await supabaseServer
+      .from('messages')
+      .select('content, created_at, role')
+      .eq('role', 'user')
+      .eq('user_id', userId)
+      .gte('created_at', startDate.toISOString())
+      .lte('created_at', endDate.toISOString())
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching messages for weekly summary:', error)
+      return null
+    }
+
+    type MessageRow = {
+      content: string | null
+      created_at: string
+      role: string
+    }
+
+    // Calculate stats
+    const totalEntries = messages?.length || 0
+
+    // Count active days (unique dates)
+    const activeDaysSet = new Set<string>()
+    const userMessages: string[] = []
+
+    if (messages) {
+      for (const message of (messages as MessageRow[])) {
+        // Extract date (YYYY-MM-DD)
+        const messageDate = new Date(message.created_at).toISOString().split('T')[0]
+        activeDaysSet.add(messageDate)
+
+        // Collect message content for AI summary
+        if (message.content) {
+          userMessages.push(message.content)
+        }
+      }
+    }
+
+    const activeDays = activeDaysSet.size
+
+    return {
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate),
+      totalEntries,
+      activeDays,
+      totalDays: 7,
+      userMessages,
+    }
+  } catch (error) {
+    console.error('Error in getWeeklyDataForUser:', error)
+    return null
+  }
+}
+
+/**
+ * Extract highlights from user messages (simple version)
+ * Takes the first few meaningful messages as highlights
+ */
+export function extractHighlights(messages: string[], maxHighlights = 5): string[] {
+  if (!messages || messages.length === 0) {
+    return []
+  }
+
+  // Filter out very short messages (less than 20 chars)
+  const meaningfulMessages = messages.filter(msg => msg.length >= 20)
+
+  // Take up to maxHighlights messages, truncate if too long
+  const highlights = meaningfulMessages
+    .slice(0, maxHighlights)
+    .map(msg => {
+      // Truncate long messages
+      if (msg.length > 150) {
+        return msg.substring(0, 147) + '...'
+      }
+      return msg
+    })
+
+  return highlights
+}
