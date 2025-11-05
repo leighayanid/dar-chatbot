@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase'
-import { ArrowLeftIcon, UserIcon, SaveIcon, Loader2Icon, BellIcon } from 'lucide-react'
+import { ArrowLeftIcon, UserIcon, SaveIcon, Loader2Icon, BellIcon, MonitorIcon, ZoomInIcon, ZoomOutIcon, MaximizeIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useUISize, type UISize } from '@/contexts/ui-size-context'
 
 interface UserProfile {
   full_name: string | null
@@ -26,6 +27,7 @@ interface UserPreferences {
 
 export default function SettingsPage() {
   const { user, loading: authLoading } = useAuth()
+  const { size: uiSize, setSize: setUISize } = useUISize()
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -381,6 +383,143 @@ export default function SettingsPage() {
                   rows={4}
                   className="w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-zinc-900 transition-colors focus:border-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 dark:focus:border-rose-300"
                 />
+              </div>
+
+              {/* Divider - UI Appearance */}
+              <div className="border-t border-zinc-200 pt-8 dark:border-zinc-800">
+                <div className="mb-6 flex items-center gap-3">
+                  <div className="rounded-xl bg-gradient-to-br from-purple-400 to-pink-400 p-3">
+                    <MonitorIcon className="size-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                      UI Appearance
+                    </h3>
+                    <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                      Customize the interface size and density
+                    </p>
+                  </div>
+                </div>
+
+                {/* UI Size Selector */}
+                <div>
+                  <label className="mb-3 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    Interface Size
+                  </label>
+                  <p className="mb-4 text-xs text-zinc-500 dark:text-zinc-400">
+                    Choose how compact or spacious you want the interface
+                  </p>
+
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {/* Compact */}
+                    <button
+                      type="button"
+                      onClick={() => setUISize('compact')}
+                      className={`group relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all ${
+                        uiSize === 'compact'
+                          ? 'border-purple-400 bg-purple-50 dark:border-purple-500 dark:bg-purple-950/30'
+                          : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600'
+                      }`}
+                    >
+                      {uiSize === 'compact' && (
+                        <div className="absolute right-2 top-2">
+                          <div className="rounded-full bg-purple-400 p-1">
+                            <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                      <div className="mb-2 flex items-center gap-2">
+                        <ZoomOutIcon className={`size-5 ${
+                          uiSize === 'compact' ? 'text-purple-600 dark:text-purple-400' : 'text-zinc-600 dark:text-zinc-400'
+                        }`} />
+                        <span className={`font-semibold ${
+                          uiSize === 'compact' ? 'text-purple-900 dark:text-purple-200' : 'text-zinc-900 dark:text-zinc-100'
+                        }`}>
+                          Compact
+                        </span>
+                      </div>
+                      <p className={`text-xs ${
+                        uiSize === 'compact' ? 'text-purple-700 dark:text-purple-300' : 'text-zinc-600 dark:text-zinc-400'
+                      }`}>
+                        More content, less spacing. Best for small screens and power users.
+                      </p>
+                    </button>
+
+                    {/* Default */}
+                    <button
+                      type="button"
+                      onClick={() => setUISize('default')}
+                      className={`group relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all ${
+                        uiSize === 'default'
+                          ? 'border-purple-400 bg-purple-50 dark:border-purple-500 dark:bg-purple-950/30'
+                          : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600'
+                      }`}
+                    >
+                      {uiSize === 'default' && (
+                        <div className="absolute right-2 top-2">
+                          <div className="rounded-full bg-purple-400 p-1">
+                            <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                      <div className="mb-2 flex items-center gap-2">
+                        <MaximizeIcon className={`size-5 ${
+                          uiSize === 'default' ? 'text-purple-600 dark:text-purple-400' : 'text-zinc-600 dark:text-zinc-400'
+                        }`} />
+                        <span className={`font-semibold ${
+                          uiSize === 'default' ? 'text-purple-900 dark:text-purple-200' : 'text-zinc-900 dark:text-zinc-100'
+                        }`}>
+                          Default
+                        </span>
+                      </div>
+                      <p className={`text-xs ${
+                        uiSize === 'default' ? 'text-purple-700 dark:text-purple-300' : 'text-zinc-600 dark:text-zinc-400'
+                      }`}>
+                        Balanced experience. Comfortable for most users and screen sizes.
+                      </p>
+                    </button>
+
+                    {/* Comfortable */}
+                    <button
+                      type="button"
+                      onClick={() => setUISize('comfortable')}
+                      className={`group relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all ${
+                        uiSize === 'comfortable'
+                          ? 'border-purple-400 bg-purple-50 dark:border-purple-500 dark:bg-purple-950/30'
+                          : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600'
+                      }`}
+                    >
+                      {uiSize === 'comfortable' && (
+                        <div className="absolute right-2 top-2">
+                          <div className="rounded-full bg-purple-400 p-1">
+                            <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      )}
+                      <div className="mb-2 flex items-center gap-2">
+                        <ZoomInIcon className={`size-5 ${
+                          uiSize === 'comfortable' ? 'text-purple-600 dark:text-purple-400' : 'text-zinc-600 dark:text-zinc-400'
+                        }`} />
+                        <span className={`font-semibold ${
+                          uiSize === 'comfortable' ? 'text-purple-900 dark:text-purple-200' : 'text-zinc-900 dark:text-zinc-100'
+                        }`}>
+                          Comfortable
+                        </span>
+                      </div>
+                      <p className={`text-xs ${
+                        uiSize === 'comfortable' ? 'text-purple-700 dark:text-purple-300' : 'text-zinc-600 dark:text-zinc-400'
+                      }`}>
+                        Larger text, generous spacing. Better accessibility and readability.
+                      </p>
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Divider */}

@@ -120,3 +120,79 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* UI Size System */
+:root {
+  /* Default size variables */
+  --ui-text-xs: 0.75rem;      /* 12px */
+  --ui-text-sm: 0.875rem;     /* 14px */
+  --ui-text-base: 1rem;        /* 16px */
+  --ui-text-lg: 1.125rem;      /* 18px */
+  --ui-text-xl: 1.25rem;       /* 20px */
+  --ui-text-2xl: 1.5rem;       /* 24px */
+
+  --ui-spacing-xs: 0.5rem;     /* 8px */
+  --ui-spacing-sm: 0.75rem;    /* 12px */
+  --ui-spacing-md: 1rem;       /* 16px */
+  --ui-spacing-lg: 1.5rem;     /* 24px */
+  --ui-spacing-xl: 2rem;       /* 32px */
+
+  --ui-avatar-size: 40px;
+  --ui-input-height: 60px;
+  --ui-sidebar-width: 280px;
+  --ui-message-max-width: 75%;
+  --ui-border-radius: 0.5rem;  /* 8px */
+  --ui-icon-size: 20px;
+
+  --ui-scale: 1;
+}
+
+/* Compact Size */
+.ui-compact {
+  --ui-text-xs: 0.6875rem;    /* 11px */
+  --ui-text-sm: 0.75rem;       /* 12px */
+  --ui-text-base: 0.875rem;    /* 14px */
+  --ui-text-lg: 1rem;          /* 16px */
+  --ui-text-xl: 1.125rem;      /* 18px */
+  --ui-text-2xl: 1.25rem;      /* 20px */
+
+  --ui-spacing-xs: 0.375rem;   /* 6px */
+  --ui-spacing-sm: 0.5rem;     /* 8px */
+  --ui-spacing-md: 0.75rem;    /* 12px */
+  --ui-spacing-lg: 1rem;       /* 16px */
+  --ui-spacing-xl: 1.5rem;     /* 24px */
+
+  --ui-avatar-size: 32px;
+  --ui-input-height: 48px;
+  --ui-sidebar-width: 240px;
+  --ui-message-max-width: 70%;
+  --ui-border-radius: 0.375rem; /* 6px */
+  --ui-icon-size: 16px;
+
+  --ui-scale: 0.85;
+}
+
+/* Comfortable Size */
+.ui-comfortable {
+  --ui-text-xs: 0.8125rem;    /* 13px */
+  --ui-text-sm: 0.9375rem;     /* 15px */
+  --ui-text-base: 1.0625rem;   /* 17px */
+  --ui-text-lg: 1.25rem;       /* 20px */
+  --ui-text-xl: 1.375rem;      /* 22px */
+  --ui-text-2xl: 1.625rem;     /* 26px */
+
+  --ui-spacing-xs: 0.625rem;   /* 10px */
+  --ui-spacing-sm: 0.875rem;   /* 14px */
+  --ui-spacing-md: 1.25rem;    /* 20px */
+  --ui-spacing-lg: 1.75rem;    /* 28px */
+  --ui-spacing-xl: 2.5rem;     /* 40px */
+
+  --ui-avatar-size: 48px;
+  --ui-input-height: 72px;
+  --ui-sidebar-width: 320px;
+  --ui-message-max-width: 80%;
+  --ui-border-radius: 0.625rem; /* 10px */
+  --ui-icon-size: 24px;
+
+  --ui-scale: 1.1;
+}
