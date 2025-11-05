@@ -58,6 +58,8 @@ import { OnboardingFlow } from "@/components/onboarding-flow";
 import { useKeyboardShortcuts } from "@/hooks/use-keyboard-shortcuts";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { TeamSwitcher } from "@/components/team-switcher";
+import { SlashCommandMenu } from "@/components/slash-command-menu";
+import type { SlashCommand } from "@/lib/slash-commands";
 
 const STORAGE_KEY = "dar-chat-messages";
 const CONVERSATION_ID_KEY = "dar-conversation-id";
@@ -278,6 +280,8 @@ export default function Home() {
   const [showPreview, setShowPreview] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [slashQuery, setSlashQuery] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -291,6 +295,69 @@ export default function Home() {
       setInputValue(transcript);
     }
   }, [transcript]);
+
+  // Detect slash command trigger
+  useEffect(() => {
+    const cursorPosition = inputRef.current?.selectionStart || 0;
+    const textBeforeCursor = inputValue.slice(0, cursorPosition);
+
+    // Check if the last word starts with "/"
+    const lastWord = textBeforeCursor.split(/\s/).pop() || '';
+
+    if (lastWord.startsWith('/') && lastWord.length > 0) {
+      setShowSlashMenu(true);
+      setSlashQuery(lastWord);
+    } else {
+      setShowSlashMenu(false);
+      setSlashQuery('');
+    }
+  }, [inputValue]);
+
+  // Handle slash command selection
+  const handleSlashCommandSelect = (command: SlashCommand) => {
+    // Remove the slash command from input
+    const cursorPosition = inputRef.current?.selectionStart || 0;
+    const textBeforeCursor = inputValue.slice(0, cursorPosition);
+    const textAfterCursor = inputValue.slice(cursorPosition);
+
+    // Find and remove the last slash command
+    const lastSlashIndex = textBeforeCursor.lastIndexOf('/');
+    const newTextBefore = textBeforeCursor.slice(0, lastSlashIndex);
+
+    if (command.type === 'template' && command.content) {
+      // Insert template content
+      const newValue = newTextBefore + command.content + textAfterCursor;
+      setInputValue(newValue);
+
+      // Close menu
+      setShowSlashMenu(false);
+      setSlashQuery('');
+
+      // Focus input
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 0);
+    } else if (command.type === 'action') {
+      // Execute action
+      setShowSlashMenu(false);
+      setSlashQuery('');
+
+      // Handle different actions
+      if (command.id === 'stats') {
+        setViewMode('summary');
+      } else if (command.id === 'settings') {
+        router.push('/settings');
+      } else if (command.id === 'help') {
+        setInputValue('How can I use DAR effectively? What features are available?');
+        setTimeout(() => {
+          if (inputValue.trim()) {
+            sendMessage({ text: 'How can I use DAR effectively? What features are available?' });
+            setInputValue('');
+          }
+        }, 100);
+      }
+    }
+  };
 
   // Toggle voice recording
   const toggleVoiceRecording = () => {
@@ -977,6 +1044,18 @@ export default function Home() {
           <ConversationScrollButton />
         </Conversation>
 
+        {/* Slash Command Menu */}
+        {showSlashMenu && (
+          <SlashCommandMenu
+            query={slashQuery}
+            onSelect={handleSlashCommandSelect}
+            onClose={() => {
+              setShowSlashMenu(false);
+              setSlashQuery('');
+            }}
+          />
+        )}
+
         {/* Input Area - Fixed at bottom */}
         <div className="flex-shrink-0 border-t border-zinc-200/60 bg-white/80 backdrop-blur-xl p-5 dark:border-zinc-800/60 dark:bg-zinc-900/80">
           <div className="rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100 p-1 shadow-lg dark:from-zinc-800 dark:to-zinc-900">
@@ -995,7 +1074,7 @@ export default function Home() {
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="What did you accomplish today? (Cmd/Ctrl+K to focus, Cmd/Ctrl+Enter to send)"
+                  placeholder="What did you accomplish today? Type / for templates (Cmd/Ctrl+K to focus, Cmd/Ctrl+Enter to send)"
                   className="min-h-[60px] resize-none rounded-xl border-0 bg-white px-4 py-3 text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
                 />
               </PromptInputBody>

@@ -324,3 +324,10 @@ supabase db reset  # Apply the migration locally
   - All components fully support both themes
 - The app uses Tailwind CSS v4 (PostCSS config in `postcss.config.mjs`)
 - **Message Conversion**: API route uses `convertToModelMessages()` to convert UI messages to model messages for AI SDK compatibility
+- **Slash Commands**: Type `/` in chat to access templates and quick actions
+  - 10+ pre-built templates for structured logging (daily recap, wins, challenges, learnings, etc.)
+  - Quick actions for stats, settings, and help
+  - Full keyboard navigation (↑↓ Enter Esc)
+  - Smart search and filtering
+  - Beautiful glassmorphic design
+  - See `SLASH_COMMANDS.md` for full documentation
