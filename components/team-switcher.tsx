@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useTeam } from '@/lib/teams/team-context'
 import { UsersIcon, PlusIcon, SettingsIcon, CheckIcon, ChevronDownIcon } from 'lucide-react'
 
@@ -36,10 +37,10 @@ export function TeamSwitcher() {
       {isOpen && (
         <>
           <div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-[60]"
             onClick={() => setIsOpen(false)}
           />
-          <div className="absolute right-0 z-50 mt-2 w-64 rounded-lg border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
+          <div className="absolute right-0 z-[70] mt-2 w-64 rounded-lg border border-zinc-200 bg-white shadow-xl dark:border-zinc-700 dark:bg-zinc-800">
             <div className="p-2">
               {/* Personal Workspace */}
               <button
@@ -126,6 +127,29 @@ function CreateTeamModal({ onClose }: { onClose: () => void }) {
   const [description, setDescription] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+
+    // Prevent body scroll when modal is open
+    document.body.style.overflow = 'hidden'
+
+    // Handle escape key
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+      }
+    }
+
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      setMounted(false)
+      document.body.style.overflow = ''
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [onClose])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -153,16 +177,30 @@ function CreateTeamModal({ onClose }: { onClose: () => void }) {
     }
   }
 
-  return (
+  if (!mounted) return null
+
+  const modalContent = (
     <>
       <div
-        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+        className="fixed inset-0 z-[100] animate-in fade-in bg-black/50 backdrop-blur-sm duration-200"
         onClick={onClose}
       />
-      <div className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-700 dark:bg-zinc-800">
-        <h2 className="mb-4 text-2xl font-bold text-zinc-900 dark:text-zinc-100">
-          Create New Team
-        </h2>
+      <div className="fixed left-1/2 top-1/2 z-[101] mx-4 w-full max-w-md -translate-x-1/2 -translate-y-1/2 animate-in zoom-in-95 fade-in slide-in-from-bottom-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-2xl duration-200 dark:border-zinc-700 dark:bg-zinc-800">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">
+            Create New Team
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg p-2 text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-700 dark:hover:text-zinc-300"
+            aria-label="Close modal"
+          >
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -213,20 +251,32 @@ function CreateTeamModal({ onClose }: { onClose: () => void }) {
               type="button"
               onClick={onClose}
               disabled={isCreating}
-              className="flex-1 rounded-lg border border-zinc-300 px-4 py-2 font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-750"
+              className="flex-1 rounded-lg border border-zinc-300 px-4 py-2 font-medium text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-50 active:scale-95 disabled:opacity-50 disabled:hover:scale-100 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-750"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isCreating || !name.trim()}
-              className="flex-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-2 font-medium text-white transition-all hover:from-blue-600 hover:to-indigo-600 disabled:opacity-50 disabled:hover:from-blue-500 disabled:hover:to-indigo-500"
+              className="flex-1 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 px-4 py-2 font-medium text-white shadow-lg transition-all hover:scale-105 hover:from-blue-600 hover:to-indigo-600 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100 disabled:hover:from-blue-500 disabled:hover:to-indigo-500"
             >
-              {isCreating ? 'Creating...' : 'Create Team'}
+              {isCreating ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Creating...
+                </span>
+              ) : (
+                'Create Team'
+              )}
             </button>
           </div>
         </form>
       </div>
     </>
   )
+
+  return createPortal(modalContent, document.body)
 }

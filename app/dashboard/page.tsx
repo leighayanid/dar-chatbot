@@ -37,6 +37,7 @@ import {
   SparklesIcon,
   TrendingUpIcon,
   ChevronDownIcon,
+  ChevronUpIcon,
   CheckSquareIcon,
   MicIcon,
   MicOffIcon,
@@ -269,7 +270,8 @@ export default function Home() {
     [originalSendMessage]
   );
 
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [historyExpanded, setHistoryExpanded] = useState(true);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const [viewMode, setViewMode] = useState<ViewMode>("chat");
   const [summaryPeriod, setSummaryPeriod] = useState<"week" | "month">("week");
@@ -574,13 +576,13 @@ export default function Home() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
-      <header className="w-full border-b border-zinc-200/60 bg-white/80 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-900/80">
+    <div className="flex h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
+      <header className="flex-shrink-0 w-full border-b border-zinc-200/60 bg-white/80 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-900/80">
         <div className="flex w-full items-center justify-between px-6 py-5">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="group rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 p-2.5 text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300 lg:hidden"
+              className="group rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 p-2.5 text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
               title="Toggle sidebar"
             >
               {sidebarOpen ? (
@@ -772,42 +774,56 @@ export default function Home() {
         {/* Sidebar */}
         <aside
           className={`${
-            sidebarOpen ? "translate-x-0" : "-translate-x-full"
-          } fixed inset-y-0 left-0 top-[85px] z-20 w-72 border-r border-zinc-200/60 bg-white/95 backdrop-blur-xl transition-transform duration-300 dark:border-zinc-800/60 dark:bg-zinc-900/95 lg:static lg:top-0 lg:translate-x-0`}
+            sidebarOpen ? "translate-x-0 lg:static" : "-translate-x-full lg:-translate-x-full"
+          } fixed inset-y-0 left-0 top-[85px] z-20 w-72 border-r border-zinc-200/60 bg-white/95 backdrop-blur-xl transition-transform duration-300 dark:border-zinc-800/60 dark:bg-zinc-900/95 lg:top-0`}
         >
           <div className="flex h-full flex-col p-5">
-            <div className="mb-6 flex items-center gap-2.5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-3 shadow-sm dark:from-blue-950/30 dark:to-indigo-950/30">
-              <div className="rounded-lg bg-white p-2 shadow-sm dark:bg-zinc-800">
-                <CalendarIcon className="size-5 text-blue-600 dark:text-blue-400" />
+            <button
+              onClick={() => setHistoryExpanded(!historyExpanded)}
+              className="mb-6 flex items-center justify-between gap-2.5 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 px-4 py-3 shadow-sm transition-all hover:shadow-md active:scale-[0.98] dark:from-blue-950/30 dark:to-indigo-950/30"
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="rounded-lg bg-white p-2 shadow-sm dark:bg-zinc-800">
+                  <CalendarIcon className="size-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
+                  History
+                </h2>
               </div>
-              <h2 className="text-lg font-bold text-zinc-900 dark:text-zinc-50">
-                History
-              </h2>
-            </div>
+              {historyExpanded ? (
+                <ChevronUpIcon className="size-5 text-zinc-600 transition-transform dark:text-zinc-400" />
+              ) : (
+                <ChevronDownIcon className="size-5 text-zinc-600 transition-transform dark:text-zinc-400" />
+              )}
+            </button>
 
-            {uniqueDates.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-xl bg-zinc-50 p-8 text-center dark:bg-zinc-800/50">
-                <CalendarIcon className="mb-3 size-12 text-zinc-300 dark:text-zinc-600" />
-                <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
-                  No messages yet
-                </p>
-              </div>
-            ) : (
-              <div className="flex-1 space-y-2 overflow-y-auto">
-                {uniqueDates.map((dateInfo) => (
-                  <button
-                    key={dateInfo.dateKey}
-                    onClick={() => scrollToDate(dateInfo.dateKey)}
-                    className="group flex w-full items-center justify-between rounded-xl bg-gradient-to-br from-zinc-50 to-zinc-100 px-4 py-3 text-left shadow-sm transition-all hover:scale-[1.02] hover:from-blue-50 hover:to-indigo-50 hover:shadow-md active:scale-[0.98] dark:from-zinc-800/50 dark:to-zinc-800/30 dark:hover:from-blue-950/30 dark:hover:to-indigo-950/30"
-                  >
-                    <span className="font-semibold text-zinc-700 transition-colors group-hover:text-blue-700 dark:text-zinc-300 dark:group-hover:text-blue-400">
-                      {dateInfo.date}
-                    </span>
-                    <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-zinc-600 shadow-sm transition-colors group-hover:bg-blue-100 group-hover:text-blue-700 dark:bg-zinc-700 dark:text-zinc-300 dark:group-hover:bg-blue-900/50 dark:group-hover:text-blue-300">
-                      {dateInfo.count}
-                    </span>
-                  </button>
-                ))}
+            {historyExpanded && (
+              <div className="animate-in fade-in slide-in-from-top-2 duration-200">
+                {uniqueDates.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center rounded-xl bg-zinc-50 p-8 text-center dark:bg-zinc-800/50">
+                    <CalendarIcon className="mb-3 size-12 text-zinc-300 dark:text-zinc-600" />
+                    <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">
+                      No messages yet
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex-1 space-y-2 overflow-y-auto">
+                    {uniqueDates.map((dateInfo) => (
+                      <button
+                        key={dateInfo.dateKey}
+                        onClick={() => scrollToDate(dateInfo.dateKey)}
+                        className="group flex w-full items-center justify-between rounded-xl bg-gradient-to-br from-zinc-50 to-zinc-100 px-4 py-3 text-left shadow-sm transition-all hover:scale-[1.02] hover:from-blue-50 hover:to-indigo-50 hover:shadow-md active:scale-[0.98] dark:from-zinc-800/50 dark:to-zinc-800/30 dark:hover:from-blue-950/30 dark:hover:to-indigo-950/30"
+                      >
+                        <span className="font-semibold text-zinc-700 transition-colors group-hover:text-blue-700 dark:text-zinc-300 dark:group-hover:text-blue-400">
+                          {dateInfo.date}
+                        </span>
+                        <span className="rounded-full bg-white px-2.5 py-0.5 text-xs font-bold text-zinc-600 shadow-sm transition-colors group-hover:bg-blue-100 group-hover:text-blue-700 dark:bg-zinc-700 dark:text-zinc-300 dark:group-hover:bg-blue-900/50 dark:group-hover:text-blue-300">
+                          {dateInfo.count}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -823,14 +839,16 @@ export default function Home() {
 
         {/* Main Content */}
         <div className="flex flex-1 flex-col items-center overflow-hidden">
-          <div className="flex w-full max-w-3xl flex-1 flex-col">
+          <div className={`flex w-full flex-1 flex-col overflow-hidden transition-all duration-300 ${
+            sidebarOpen ? "max-w-3xl" : "max-w-4xl"
+          }`}>
         {viewMode === "chat" ? (
-          <>
+          <div className="flex flex-1 flex-col overflow-hidden">
           {/* Smart Daily Summary */}
-          <div className="p-4 pb-0">
+          <div className="flex-shrink-0 p-4 pb-0">
             <SmartDailySummary />
           </div>
-          <Conversation className="flex-1">
+          <Conversation className="flex-1 min-h-0">
           <ConversationContent>
             {isLoading ? (
               <div className="flex h-full items-center justify-center p-8">
@@ -861,28 +879,28 @@ export default function Home() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-8 p-4">
+              <div className="space-y-6 p-4">
                 {groupMessagesByDate(messages).map((group, groupIndex) => (
                   <div
                     key={groupIndex}
                     ref={(el) => {
                       dateRefs.current[group.dateKey] = el;
                     }}
-                    className="space-y-5"
+                    className="space-y-3"
                   >
                     {/* Date Header */}
-                    <div className="sticky top-2 z-10 flex justify-center">
-                      <div className="rounded-full bg-gradient-to-r from-blue-100 via-indigo-100 to-purple-100 px-5 py-2 text-xs font-bold text-blue-900 shadow-lg backdrop-blur-sm dark:from-blue-950/80 dark:via-indigo-950/80 dark:to-purple-950/80 dark:text-blue-200">
+                    <div className="sticky top-1 z-10 flex justify-center">
+                      <div className="rounded-full bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 px-4 py-1.5 text-xs font-semibold text-blue-800 shadow-sm backdrop-blur-sm ring-1 ring-blue-200/50 dark:from-blue-950/70 dark:via-indigo-950/70 dark:to-purple-950/70 dark:text-blue-200 dark:ring-blue-800/50">
                         {group.date}
                       </div>
                     </div>
 
                     {/* Messages for this date */}
-                    <div className="space-y-5">
+                    <div className="space-y-3">
                       {group.messages.map((message) => (
                         <div
                           key={message.id}
-                          className={`group flex gap-3 ${
+                          className={`group flex gap-2.5 ${
                             message.role === "user" ? "flex-row-reverse" : "flex-row"
                           }`}
                         >
@@ -890,10 +908,10 @@ export default function Home() {
                           <div className="flex-shrink-0">
                             <div className="relative">
                               <div
-                                className={`absolute -inset-1 rounded-full bg-gradient-to-r opacity-0 blur transition-opacity group-hover:opacity-100 ${
+                                className={`absolute -inset-0.5 rounded-full bg-gradient-to-r opacity-0 blur-sm transition-opacity group-hover:opacity-75 ${
                                   message.role === "user"
-                                    ? "from-blue-600 to-indigo-600"
-                                    : "from-purple-600 to-pink-600"
+                                    ? "from-blue-500 to-indigo-500"
+                                    : "from-purple-500 to-pink-500"
                                 }`}
                               />
                               <img
@@ -903,26 +921,26 @@ export default function Home() {
                                     : "https://api.dicebear.com/7.x/bottts/svg?seed=assistant"
                                 }
                                 alt={message.role === "user" ? "You" : "AI"}
-                                className="relative size-10 rounded-full border-2 border-white shadow-md dark:border-zinc-800"
+                                className="relative size-8 rounded-full border-2 border-white shadow-sm dark:border-zinc-800"
                               />
                             </div>
                           </div>
 
                           {/* Message Bubble */}
                           <div
-                            className={`flex max-w-[75%] flex-col gap-1.5 ${
+                            className={`flex max-w-[80%] flex-col gap-1 ${
                               message.role === "user" ? "items-end" : "items-start"
                             }`}
                           >
                             <div
-                              className={`rounded-2xl px-5 py-3 shadow-md transition-all group-hover:shadow-xl ${
+                              className={`rounded-2xl px-4 py-2.5 shadow-sm transition-all group-hover:shadow-md ${
                                 message.role === "user"
                                   ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
-                                  : "bg-white dark:bg-zinc-800"
+                                  : "bg-white border border-zinc-200/60 dark:bg-zinc-800 dark:border-zinc-700/60"
                               }`}
                             >
                               <div
-                                className={`prose prose-sm max-w-none ${
+                                className={`prose prose-sm max-w-none leading-relaxed ${
                                   message.role === "user"
                                     ? "prose-invert"
                                     : "dark:prose-invert"
@@ -937,7 +955,7 @@ export default function Home() {
                               </div>
                             </div>
                             <div
-                              className={`px-2 text-xs font-medium text-zinc-500 dark:text-zinc-400 ${
+                              className={`px-1.5 text-[10px] font-medium text-zinc-400 dark:text-zinc-500 ${
                                 message.role === "user" ? "text-right" : "text-left"
                               }`}
                             >
@@ -959,8 +977,8 @@ export default function Home() {
           <ConversationScrollButton />
         </Conversation>
 
-        {/* Input Area */}
-        <div className="border-t border-zinc-200/60 bg-white/80 backdrop-blur-xl p-5 dark:border-zinc-800/60 dark:bg-zinc-900/80">
+        {/* Input Area - Fixed at bottom */}
+        <div className="flex-shrink-0 border-t border-zinc-200/60 bg-white/80 backdrop-blur-xl p-5 dark:border-zinc-800/60 dark:bg-zinc-900/80">
           <div className="rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100 p-1 shadow-lg dark:from-zinc-800 dark:to-zinc-900">
             <PromptInput
               onSubmit={(message, event) => {
@@ -1011,7 +1029,7 @@ export default function Home() {
             </PromptInput>
           </div>
         </div>
-        </>
+          </div>
         ) : (
           /* Summary View */
           <div className="flex-1 overflow-y-auto p-6">
