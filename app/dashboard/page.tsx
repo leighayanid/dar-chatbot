@@ -31,6 +31,7 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
   XIcon,
+  MoreVerticalIcon,
 } from "lucide-react";
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -41,6 +42,7 @@ import {
   getAllMessages,
   deleteConversation,
   getConversations,
+  deleteMessage as deleteMessageFromDB,
 } from "@/lib/supabase";
 import { useAuth } from "@/lib/auth/auth-context";
 import { SmartDailySummary } from "@/components/smart-daily-summary";
@@ -268,8 +270,10 @@ export default function Home() {
   const [inputValue, setInputValue] = useState('');
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [slashQuery, setSlashQuery] = useState('');
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const dateRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Voice recognition hook
   const { isListening, transcript, startListening, stopListening, resetTranscript, isSupported } = useSpeechRecognition();
@@ -512,6 +516,47 @@ export default function Home() {
     setMessages([]);
     localStorage.removeItem(STORAGE_KEY);
   };
+
+  // Delete individual message function
+  const deleteMessage = async (messageId: string) => {
+    if (!confirm('Are you sure you want to delete this message?')) return;
+
+    try {
+      // Delete from database
+      const success = await deleteMessageFromDB(messageId);
+
+      if (!success) {
+        throw new Error('Database deletion failed');
+      }
+
+      // Remove message from state
+      const updatedMessages = messages.filter((msg) => msg.id !== messageId);
+      setMessages(updatedMessages);
+
+      // Update localStorage
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedMessages));
+
+      // Close dropdown
+      setOpenDropdownId(null);
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+      alert('Failed to delete message. Please try again.');
+    }
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setOpenDropdownId(null);
+      }
+    }
+
+    if (openDropdownId) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [openDropdownId]);
 
   // Show preview modal
   const showExportPreview = () => {
@@ -770,7 +815,7 @@ export default function Home() {
                       {group.messages.map((message) => (
                         <div
                           key={message.id}
-                          className={`group flex gap-2.5 ${
+                          className={`group/message flex gap-2.5 ${
                             message.role === "user" ? "flex-row-reverse" : "flex-row"
                           }`}
                         >
@@ -778,7 +823,7 @@ export default function Home() {
                           <div className="flex-shrink-0">
                             <div className="relative">
                               <div
-                                className={`absolute -inset-0.5 rounded-full bg-gradient-to-r opacity-0 blur-sm transition-opacity group-hover:opacity-75 ${
+                                className={`absolute -inset-0.5 rounded-full bg-gradient-to-r opacity-0 blur-sm transition-opacity group-hover/message:opacity-75 ${
                                   message.role === "user"
                                     ? "from-blue-500 to-indigo-500"
                                     : "from-purple-500 to-pink-500"
@@ -796,44 +841,77 @@ export default function Home() {
                             </div>
                           </div>
 
-                          {/* Message Bubble */}
+                          {/* Message Bubble with Actions */}
                           <div
                             className={`flex max-w-[80%] flex-col gap-1 ${
                               message.role === "user" ? "items-end" : "items-start"
                             }`}
                           >
-                            <div
-                              className={`rounded-2xl px-4 py-2.5 shadow-sm transition-all group-hover:shadow-md ${
-                                message.role === "user"
-                                  ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
-                                  : "bg-white border border-zinc-200/60 dark:bg-zinc-800 dark:border-zinc-700/60"
-                              }`}
-                            >
-                              <div
-                                className={`prose prose-sm max-w-none leading-relaxed ${
-                                  message.role === "user"
-                                    ? "prose-invert"
-                                    : "dark:prose-invert"
-                                }`}
-                              >
-                                {message.parts.map((part: any, index: number) => {
-                                  if (part.type === "text") {
-                                    return <span key={index}>{part.text}</span>;
-                                  }
-                                  return null;
-                                })}
-                              </div>
-                            </div>
-                            <div
-                              className={`px-1.5 text-[10px] font-medium text-zinc-400 dark:text-zinc-500 ${
-                                message.role === "user" ? "text-right" : "text-left"
-                              }`}
-                            >
-                              {formatTime(
-                                message.createdAt
-                                  ? new Date(message.createdAt)
-                                  : new Date()
+                            <div className="relative flex items-start gap-2">
+                              {/* Three-dot menu button (appears on hover) */}
+                              {message.role === "user" && (
+                                <div className="relative" ref={openDropdownId === message.id ? dropdownRef : null}>
+                                  <button
+                                    onClick={() => setOpenDropdownId(openDropdownId === message.id ? null : message.id)}
+                                    className={`opacity-0 group-hover/message:opacity-100 transition-opacity rounded-lg p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 ${
+                                      openDropdownId === message.id ? 'opacity-100' : ''
+                                    }`}
+                                    aria-label="Message options"
+                                  >
+                                    <MoreVerticalIcon className="size-4 text-zinc-600 dark:text-zinc-400" />
+                                  </button>
+
+                                  {/* Dropdown menu */}
+                                  {openDropdownId === message.id && (
+                                    <div className="absolute right-0 top-full z-50 mt-1 w-32 rounded-xl border border-zinc-200 bg-white p-1 shadow-lg dark:border-zinc-700 dark:bg-zinc-800">
+                                      <button
+                                        onClick={() => deleteMessage(message.id)}
+                                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                                      >
+                                        <Trash2Icon className="size-4" />
+                                        Delete
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
                               )}
+
+                              {/* Message bubble content */}
+                              <div className="flex flex-col gap-1">
+                                <div
+                                  className={`rounded-2xl px-4 py-2.5 shadow-sm transition-all group-hover/message:shadow-md ${
+                                    message.role === "user"
+                                      ? "bg-gradient-to-br from-blue-500 to-indigo-600 text-white"
+                                      : "bg-white border border-zinc-200/60 dark:bg-zinc-800 dark:border-zinc-700/60"
+                                  }`}
+                                >
+                                  <div
+                                    className={`prose prose-sm max-w-none leading-relaxed ${
+                                      message.role === "user"
+                                        ? "prose-invert"
+                                        : "dark:prose-invert"
+                                    }`}
+                                  >
+                                    {message.parts.map((part: any, index: number) => {
+                                      if (part.type === "text") {
+                                        return <span key={index}>{part.text}</span>;
+                                      }
+                                      return null;
+                                    })}
+                                  </div>
+                                </div>
+                                <div
+                                  className={`px-1.5 text-[10px] font-medium text-zinc-400 dark:text-zinc-500 ${
+                                    message.role === "user" ? "text-right" : "text-left"
+                                  }`}
+                                >
+                                  {formatTime(
+                                    message.createdAt
+                                      ? new Date(message.createdAt)
+                                      : new Date()
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>

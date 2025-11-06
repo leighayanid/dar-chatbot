@@ -8,7 +8,6 @@ import { TeamSwitcher } from '@/components/team-switcher'
 import { useAuth } from '@/lib/auth/auth-context'
 import { useTheme } from '@/lib/theme/theme-context'
 import {
-  UserIcon,
   ChevronDownIcon,
   CheckSquareIcon,
   TrendingUpIcon,
@@ -73,10 +72,13 @@ export function AppHeader({ children, actions }: AppHeaderProps) {
             <div className="relative z-50" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="relative z-50 flex items-center gap-2 rounded-xl bg-linear-to-br from-zinc-100 to-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
+                className="relative z-50 flex items-center gap-2 rounded-full bg-linear-to-br from-zinc-100 to-zinc-200 p-1 pr-3 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
               >
-                <UserIcon className="size-4" />
-                <span className="hidden max-w-[150px] truncate md:inline">{user.email}</span>
+                <img
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.email}`}
+                  alt="User avatar"
+                  className="size-8 rounded-full border-2 border-white dark:border-zinc-700"
+                />
                 <ChevronDownIcon className={`size-4 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
