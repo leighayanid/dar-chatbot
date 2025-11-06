@@ -53,8 +53,8 @@ export function AppHeader({ children, actions }: AppHeaderProps) {
   }
 
   return (
-    <header className="w-full flex-shrink-0 border-b border-zinc-200/60 bg-white/80 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-900/80">
-      <div className="flex w-full items-center justify-between px-4 py-3">
+    <header className="sticky top-0 z-100 w-full shrink-0 border-b border-zinc-200/60 bg-white/80 backdrop-blur-xl dark:border-zinc-800/60 dark:bg-zinc-900/80">
+      <div className="relative flex w-full items-center justify-between px-4 py-3">
         {/* Left: Logo */}
         <Link href="/dashboard" className="flex items-center">
           <Logo size="md" />
@@ -70,10 +70,10 @@ export function AppHeader({ children, actions }: AppHeaderProps) {
 
           {/* User Dropdown */}
           {user && (
-            <div className="relative" ref={dropdownRef}>
+            <div className="relative z-50" ref={dropdownRef}>
               <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-br from-zinc-100 to-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
+                className="relative z-50 flex items-center gap-2 rounded-xl bg-linear-to-br from-zinc-100 to-zinc-200 px-3 py-2 text-sm font-medium text-zinc-700 shadow-sm transition-all hover:scale-105 hover:shadow-md active:scale-95 dark:from-zinc-800 dark:to-zinc-700 dark:text-zinc-300"
               >
                 <UserIcon className="size-4" />
                 <span className="hidden max-w-[150px] truncate md:inline">{user.email}</span>
@@ -82,7 +82,7 @@ export function AppHeader({ children, actions }: AppHeaderProps) {
 
               {/* Dropdown Menu */}
               {dropdownOpen && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-64 rounded-2xl border border-zinc-200 bg-white/95 p-2 shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95">
+                <div className="absolute right-0 top-full z-9999 mt-2 w-64 rounded-2xl border border-zinc-200 bg-white/95 p-2 shadow-2xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/95">
                   {/* User Email */}
                   <div className="mb-2 border-b border-zinc-200 px-3 py-2 dark:border-zinc-800">
                     <p className="text-xs text-zinc-500 dark:text-zinc-400">Signed in as</p>
