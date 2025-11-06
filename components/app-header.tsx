@@ -48,7 +48,7 @@ export function AppHeader({ children, actions }: AppHeaderProps) {
 
   const handleSignOut = async () => {
     await signOut()
-    router.push('/login')
+    // Redirect to homepage is handled by auth context
   }
 
   return (

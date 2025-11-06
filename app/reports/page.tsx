@@ -26,10 +26,10 @@ export default function ReportsPage() {
   const [showGenerateModal, setShowGenerateModal] = useState(false)
   const [reportType, setReportType] = useState<'weekly' | 'monthly'>('weekly')
 
-  // Redirect to login if not authenticated
+  // Redirect to homepage if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login')
+      router.push('/')
     }
   }, [user, authLoading, router])
 

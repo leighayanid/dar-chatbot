@@ -218,10 +218,10 @@ export default function Home() {
 
   const { messages, sendMessage: originalSendMessage, status, setMessages } = useChat();
 
-  // Redirect to login if not authenticated
+  // Redirect to homepage if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      router.push('/');
     }
   }, [user, authLoading, router]);
 

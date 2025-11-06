@@ -47,6 +47,7 @@ export default function PricingPage() {
   const router = useRouter()
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly')
 
   useEffect(() => {
@@ -71,7 +72,7 @@ export default function PricingPage() {
     loadPlans()
   }, [])
 
-  const handleGetStarted = (planName: string) => {
+  const handleGetStarted = async (planName: string) => {
     if (!user) {
       router.push('/register')
       return
@@ -79,9 +80,44 @@ export default function PricingPage() {
 
     if (planName === 'free') {
       router.push('/dashboard')
-    } else {
-      // TODO: Redirect to Stripe checkout
-      router.push('/dashboard')
+      return
+    }
+
+    if (planName === 'enterprise') {
+      // Enterprise plans require custom contract - redirect to contact
+      window.location.href = 'mailto:sales@dar-app.com?subject=Enterprise Plan Inquiry'
+      return
+    }
+
+    try {
+      setCheckoutLoading(planName)
+
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          planName,
+          billingCycle,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to create checkout session')
+      }
+
+      const { url } = await response.json()
+
+      if (url) {
+        window.location.href = url
+      } else {
+        throw new Error('No checkout URL returned')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
+      alert('Failed to start checkout. Please try again.')
+    } finally {
+      setCheckoutLoading(null)
     }
   }
 
@@ -247,13 +283,21 @@ export default function PricingPage() {
                 {/* CTA Button */}
                 <button
                   onClick={() => handleGetStarted(plan.name)}
-                  className={`mb-8 w-full rounded-xl py-3 font-semibold shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 ${
+                  disabled={checkoutLoading !== null}
+                  className={`mb-8 w-full rounded-xl py-3 font-semibold shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 ${
                     isPopular
                       ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white'
                       : 'bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-50 dark:hover:bg-zinc-700'
                   }`}
                 >
-                  {plan.name === 'free' ? 'Get Started Free' : plan.name === 'enterprise' ? 'Contact Sales' : 'Start Free Trial'}
+                  {checkoutLoading === plan.name ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2Icon className="size-4 animate-spin" />
+                      Loading...
+                    </span>
+                  ) : (
+                    plan.name === 'free' ? 'Get Started Free' : plan.name === 'enterprise' ? 'Contact Sales' : 'Start Free Trial'
+                  )}
                 </button>
 
                 {/* Features List */}

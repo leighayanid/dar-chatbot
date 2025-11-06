@@ -15,6 +15,39 @@ export type Message = {
   created_at: string
 }
 
+export type SubscriptionPlan = {
+  id: string
+  name: string
+  display_name: string
+  description: string | null
+  price_monthly: number
+  price_yearly: number
+  stripe_product_id: string | null
+  stripe_price_monthly_id: string | null
+  stripe_price_yearly_id: string | null
+  features: any
+  is_active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export type UserSubscription = {
+  id: string
+  user_id: string
+  plan_id: string
+  stripe_subscription_id: string | null
+  stripe_customer_id: string | null
+  status: 'active' | 'past_due' | 'cancelled' | 'trialing'
+  billing_cycle: 'monthly' | 'yearly'
+  current_period_start: string
+  current_period_end: string
+  cancel_at_period_end: boolean
+  cancelled_at: string | null
+  created_at: string
+  updated_at: string
+}
+
 export type Database = {
   public: {
     Tables: {
@@ -34,6 +67,24 @@ export type Database = {
           created_at?: string
         }
         Update: Partial<Omit<Message, 'id' | 'created_at'>>
+      }
+      subscription_plans: {
+        Row: SubscriptionPlan
+        Insert: Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>>
+      }
+      user_subscriptions: {
+        Row: UserSubscription
+        Insert: Omit<UserSubscription, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Omit<UserSubscription, 'id' | 'created_at' | 'updated_at'>>
       }
     }
   }
