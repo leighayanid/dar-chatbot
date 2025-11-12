@@ -2,6 +2,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, streamText } from "ai";
 import { createMessageServer } from "@/lib/supabase";
 import { createServerClient } from "@supabase/ssr";
+import { supabaseServer } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
 // Note: Using Node.js runtime to access SUPABASE_SERVICE_ROLE_KEY
@@ -38,6 +39,51 @@ export async function POST(req: Request) {
   }
 
   console.log('API Route: User authenticated:', user.id);
+
+  // Check usage limits before processing message
+  try {
+    // Get current usage
+    const { data: currentUsage, error: usageError } = await supabaseServer.rpc('get_current_usage', {
+      user_id: user.id,
+      metric: 'messages',
+    });
+
+    if (usageError) {
+      console.error('Error fetching usage:', usageError);
+    }
+
+    // Check if user can send more messages
+    const { data: canUse, error: limitError } = await supabaseServer.rpc('check_usage_limit', {
+      user_id: user.id,
+      metric: 'messages_per_month',
+      current_usage: currentUsage || 0,
+    });
+
+    if (limitError) {
+      console.error('Error checking usage limit:', limitError);
+    }
+
+    // If user has exceeded their limit, return error
+    if (canUse === false) {
+      console.log('API Route: User exceeded message limit');
+      return new Response(
+        JSON.stringify({
+          error: 'Message limit exceeded',
+          message: 'You have reached your monthly message limit. Please upgrade your plan to continue.',
+          current_usage: currentUsage,
+        }),
+        {
+          status: 429,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+
+    console.log('API Route: Usage check passed. Current usage:', currentUsage);
+  } catch (error) {
+    console.error('Error in usage check:', error);
+    // Continue anyway to avoid blocking users on errors
+  }
 
   const { messages, conversationId } = await req.json();
 
@@ -98,6 +144,18 @@ Be encouraging, supportive, and help users see the value in their daily work.`,
           console.log('API Route: Assistant message saved successfully:', savedAssistantMessage.id);
         } else {
           console.error('API Route: Failed to save assistant message');
+        }
+
+        // Increment usage counter
+        try {
+          await supabaseServer.rpc('increment_usage', {
+            user_id: user.id,
+            metric: 'messages',
+            amount: 1,
+          });
+          console.log('API Route: Usage incremented for user:', user.id);
+        } catch (error) {
+          console.error('API Route: Error incrementing usage:', error);
         }
       } else {
         console.warn('API Route: No conversationId in onFinish');

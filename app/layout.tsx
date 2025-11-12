@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/auth/auth-context";
 import { TeamProvider } from "@/lib/teams/team-context";
+import { SubscriptionProvider } from "@/lib/subscription/subscription-context";
 import { UISizeProvider } from "@/contexts/ui-size-context";
 import { ThemeProvider } from "@/lib/theme/theme-context";
 
@@ -34,7 +35,9 @@ export default function RootLayout({
         <ThemeProvider>
           <UISizeProvider>
             <AuthProvider>
-              <TeamProvider>{children}</TeamProvider>
+              <SubscriptionProvider>
+                <TeamProvider>{children}</TeamProvider>
+              </SubscriptionProvider>
             </AuthProvider>
           </UISizeProvider>
         </ThemeProvider>

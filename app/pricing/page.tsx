@@ -92,7 +92,7 @@ export default function PricingPage() {
     try {
       setCheckoutLoading(planName)
 
-      const response = await fetch('/api/checkout', {
+      const response = await fetch('/api/stripe/create-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
