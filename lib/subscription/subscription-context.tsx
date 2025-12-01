@@ -93,16 +93,71 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
 
     try {
       const { data, error } = await supabase.rpc('get_user_plan', {
-        user_id: user.id,
+        user_id_param: user.id,
       })
 
       if (error) {
         console.error('Error fetching subscription:', error)
+        // Fallback to default free plan
+        setSubscription({
+          planName: 'free',
+          displayName: 'Free',
+          status: 'active',
+          trialEnd: null,
+          features: {
+            messages_per_month: 50,
+            active_tasks: 25,
+            custom_templates: 3,
+            system_templates: 10,
+            history_days: 30,
+            analytics_days: 30,
+            export_formats: ['json', 'csv'],
+            email_reminders: false,
+            ai_insights: false,
+          },
+        })
       } else if (data) {
         setSubscription(data as Subscription)
+      } else {
+        // No data returned, use free plan
+        setSubscription({
+          planName: 'free',
+          displayName: 'Free',
+          status: 'active',
+          trialEnd: null,
+          features: {
+            messages_per_month: 50,
+            active_tasks: 25,
+            custom_templates: 3,
+            system_templates: 10,
+            history_days: 30,
+            analytics_days: 30,
+            export_formats: ['json', 'csv'],
+            email_reminders: false,
+            ai_insights: false,
+          },
+        })
       }
     } catch (error) {
       console.error('Error fetching subscription:', error)
+      // Fallback to default free plan
+      setSubscription({
+        planName: 'free',
+        displayName: 'Free',
+        status: 'active',
+        trialEnd: null,
+        features: {
+          messages_per_month: 50,
+          active_tasks: 25,
+          custom_templates: 3,
+          system_templates: 10,
+          history_days: 30,
+          analytics_days: 30,
+          export_formats: ['json', 'csv'],
+          email_reminders: false,
+          ai_insights: false,
+        },
+      })
     } finally {
       setLoading(false)
     }
@@ -119,8 +174,8 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       const results = await Promise.all(
         metrics.map((metric) =>
           supabase.rpc('get_current_usage', {
-            user_id: user.id,
-            metric,
+            user_id_param: user.id,
+            metric_param: metric,
           })
         )
       )
@@ -132,6 +187,14 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       setUsage(usageData)
     } catch (error) {
       console.error('Error fetching usage:', error)
+      // Set default usage to 0 for all metrics
+      setUsage({
+        messages: 0,
+        tasks: 0,
+        templates: 0,
+        reports: 0,
+        api_calls: 0,
+      })
     }
   }, [user])
 

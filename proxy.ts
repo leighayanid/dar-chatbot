@@ -39,13 +39,14 @@ export async function proxy(request: NextRequest) {
 
   console.log('[Proxy]', request.nextUrl.pathname, 'Session:', !!session)
 
-  // Protected routes that require authentication
-  const protectedRoutes = ['/dashboard', '/settings', '/analytics', '/templates', '/reports', '/tasks']
-  const isProtectedRoute = protectedRoutes.some(route => request.nextUrl.pathname.startsWith(route))
+  // Public routes that don't require authentication
+  const publicRoutes = ['/', '/login', '/register', '/forgot-password', '/pricing']
+  const isPublicRoute = publicRoutes.some(route => request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + '/'))
 
   // If there's no session and the user is trying to access a protected route
-  if (!session && (request.nextUrl.pathname === '/' || isProtectedRoute)) {
-    const redirectResponse = NextResponse.redirect(new URL('/login', request.url))
+  if (!session && !isPublicRoute) {
+    // Redirect to landing page (not login page)
+    const redirectResponse = NextResponse.redirect(new URL('/', request.url))
     // Copy cookies to redirect response
     response.cookies.getAll().forEach((cookie) => {
       redirectResponse.cookies.set(cookie.name, cookie.value)
@@ -67,5 +68,15 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/', '/login', '/register', '/forgot-password', '/dashboard', '/settings', '/analytics', '/templates', '/reports', '/tasks'],
+  matcher: [
+    /*
+     * Match all request paths except for:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder (images, fonts, etc.)
+     * - api routes (handled separately)
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

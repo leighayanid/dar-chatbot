@@ -40,7 +40,20 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch('/api/teams')
 
       if (!response.ok) {
-        throw new Error('Failed to fetch teams')
+        // Get detailed error message from response
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to fetch teams:', response.status, errorData)
+
+        // Don't throw error for 401 (unauthorized) - just log it
+        // This can happen during initial load when auth is still being set up
+        if (response.status === 401) {
+          console.warn('User not authenticated yet, skipping team load')
+          setTeams([])
+          setIsLoading(false)
+          return
+        }
+
+        throw new Error(errorData.error || 'Failed to fetch teams')
       }
 
       const data = await response.json()
@@ -56,6 +69,7 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
       }
     } catch (error) {
       console.error('Error loading teams:', error)
+      // Set empty teams array on error, but don't break the app
       setTeams([])
     } finally {
       setIsLoading(false)
@@ -73,7 +87,17 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch(`/api/teams/${currentTeam.id}/members`)
 
       if (!response.ok) {
-        throw new Error('Failed to fetch team members')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to fetch team members:', response.status, errorData)
+
+        // Don't throw error for 401 - just log it
+        if (response.status === 401) {
+          console.warn('User not authenticated, skipping team role load')
+          setCurrentTeamRole(null)
+          return
+        }
+
+        throw new Error(errorData.error || 'Failed to fetch team members')
       }
 
       const data = await response.json()
@@ -81,6 +105,8 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
 
       if (member) {
         setCurrentTeamRole(member.role)
+      } else {
+        setCurrentTeamRole(null)
       }
     } catch (error) {
       console.error('Error loading current team role:', error)
