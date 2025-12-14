@@ -144,7 +144,7 @@ The app includes automated email notifications for user engagement:
    - Configurable time and days (Mon-Fri default)
    - Timezone-aware delivery
    - Template: `emails/daily-reminder.tsx`
-   - Cron: Hourly (`0 * * * *`)
+  - Cron: Daily (`0 0 * * *`)
    - Endpoint: `/api/cron/send-reminders`
 
 2. **Weekly Summaries** (Phase 2 - Complete)
