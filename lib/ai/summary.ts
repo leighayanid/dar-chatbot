@@ -1,5 +1,5 @@
-import { anthropic } from '@ai-sdk/anthropic'
 import { generateText } from 'ai'
+import { getAnthropicProvider } from './provider'
 
 /**
  * Generate an AI-powered summary of user accomplishments
@@ -13,6 +13,9 @@ export async function generateWeeklySummary(
     if (!userMessages || userMessages.length === 0) {
       return "You didn't log any accomplishments this week. Start fresh next week and capture your progress daily!"
     }
+
+    // Get anthropic provider
+    const anthropic = await getAnthropicProvider()
 
     // Combine all messages
     const allMessages = userMessages.join('\n\n')
@@ -61,6 +64,9 @@ export async function generateHighlights(
       // Return all messages if we have fewer than max
       return userMessages.filter(msg => msg.length >= 20)
     }
+
+    // Get anthropic provider
+    const anthropic = await getAnthropicProvider()
 
     // Use AI to select the most significant accomplishments
     const allMessages = userMessages

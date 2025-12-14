@@ -5,12 +5,9 @@ import { getAuthUser } from '@/lib/auth/server'
 import type { UserSubscription } from '@/lib/supabase/types'
 
 /**
- * POST /api/subscription/cancel
- * Cancel the current user's subscription (at period end)
+ * POST /api/subscription/reactivate
+ * Reactivate a cancelled subscription (undo cancel_at_period_end)
  */
-// Force dynamic rendering to avoid build-time module evaluation
-export const dynamic = 'force-dynamic'
-
 export async function POST(req: NextRequest) {
   try {
     // Get the authenticated user
@@ -20,17 +17,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get the user's active subscription
+    // Get the user's subscription that is set to cancel
     const { data, error: subError } = await supabaseServer
       .from('user_subscriptions')
       .select('*')
       .eq('user_id', user.id)
       .eq('status', 'active')
+      .eq('cancel_at_period_end', true)
       .single()
 
     if (subError || !data) {
       return NextResponse.json(
-        { error: 'No active subscription found' },
+        { error: 'No subscription set to cancel found' },
         { status: 404 }
       )
     }
@@ -44,11 +42,11 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Cancel the subscription at period end in Stripe
+    // Reactivate the subscription in Stripe
     const stripeSubscription = await stripe.subscriptions.update(
       subscription.stripe_subscription_id,
       {
-        cancel_at_period_end: true,
+        cancel_at_period_end: false,
       }
     )
 
@@ -56,7 +54,7 @@ export async function POST(req: NextRequest) {
     await (supabaseServer as any)
       .from('user_subscriptions')
       .update({
-        cancel_at_period_end: true,
+        cancel_at_period_end: false,
         updated_at: new Date().toISOString(),
       })
       .eq('id', subscription.id)
@@ -64,22 +62,20 @@ export async function POST(req: NextRequest) {
     // Log the event
     await (supabaseServer as any).from('subscription_events').insert({
       user_id: user.id,
-      event_type: 'subscription_cancel_requested',
+      event_type: 'subscription_reactivated',
       stripe_event_id: stripeSubscription.id,
       metadata: {
         subscription_id: subscription.id,
-        cancels_at: stripeSubscription.cancel_at,
       },
     })
 
     return NextResponse.json({
       success: true,
-      cancels_at: stripeSubscription.cancel_at,
     })
   } catch (error) {
-    console.error('Cancel subscription error:', error)
+    console.error('Reactivate subscription error:', error)
     return NextResponse.json(
-      { error: 'Failed to cancel subscription' },
+      { error: 'Failed to reactivate subscription' },
       { status: 500 }
     )
   }

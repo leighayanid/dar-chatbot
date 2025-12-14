@@ -8,6 +8,9 @@ import type { UserSubscription } from '@/lib/supabase/types'
  * POST /api/subscription/reactivate
  * Reactivate a cancelled subscription (undo cancel_at_period_end)
  */
+// Force dynamic rendering to avoid build-time module evaluation
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
   try {
     // Get the authenticated user

@@ -3,6 +3,9 @@ import { stripe } from '@/lib/stripe/client'
 import { supabaseServer } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/server'
 
+// Force dynamic rendering to avoid build-time module evaluation
+export const dynamic = 'force-dynamic'
+
 /**
  * POST /api/subscription/portal
  * Get a link to the Stripe customer portal for managing billing

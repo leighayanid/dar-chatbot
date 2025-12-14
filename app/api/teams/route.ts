@@ -28,6 +28,9 @@ async function getAuthenticatedUser() {
 }
 
 // GET /api/teams - Get all teams for the current user
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   try {
     const { user, error: authError, supabase } = await getAuthenticatedUser()

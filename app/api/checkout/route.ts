@@ -4,6 +4,9 @@ import { supabaseServer } from '@/lib/supabase/server'
 import { getAuthUser } from '@/lib/auth/server'
 import type { SubscriptionPlan, UserSubscription } from '@/lib/supabase/types'
 
+// Force dynamic rendering to avoid build-time module evaluation
+export const dynamic = 'force-dynamic'
+
 export async function POST(req: NextRequest) {
   try {
     // Get the authenticated user

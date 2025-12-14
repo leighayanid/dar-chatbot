@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "ANTHROPIC_API_KEY=sk-ant-build-dummy-key-00000000000000000000000000000000000000000000000000000000 next build",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",

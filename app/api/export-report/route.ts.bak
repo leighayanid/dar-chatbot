@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Document, Packer, Paragraph, Table, TableCell, TableRow, WidthType, AlignmentType, BorderStyle, HeadingLevel, TextRun } from 'docx'
 
-// Force dynamic rendering to avoid build-time module evaluation
-export const dynamic = 'force-dynamic'
-
 export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json()

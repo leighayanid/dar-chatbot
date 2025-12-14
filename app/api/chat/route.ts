@@ -1,12 +1,15 @@
-import { anthropic } from "@ai-sdk/anthropic";
 import { convertToModelMessages, streamText } from "ai";
 import { createMessageServer } from "@/lib/supabase";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseServer } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
+import { getAnthropicProvider } from "@/lib/ai/provider";
 
 // Note: Using Node.js runtime to access SUPABASE_SERVICE_ROLE_KEY
 // Edge runtime doesn't have access to non-NEXT_PUBLIC_ environment variables
+
+// Disable static generation for this route to avoid build-time module evaluation
+export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
   // Get user from session using proper SSR client
@@ -113,6 +116,9 @@ export async function POST(req: Request) {
   } else {
     console.warn('API Route: Missing userMessage or conversationId');
   }
+
+  // Get anthropic provider
+  const anthropic = await getAnthropicProvider();
 
   const result = streamText({
     model: anthropic("claude-3-5-sonnet-20241022"),

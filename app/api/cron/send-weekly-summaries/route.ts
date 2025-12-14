@@ -8,7 +8,10 @@ import { sendBatchEmails, getEmailStats } from '@/lib/email/send'
 import { renderWeeklySummaryEmail } from '@/lib/email/templates'
 import { generateWeeklySummary, generateHighlights } from '@/lib/ai/summary'
 
-export const runtime = 'edge'
+// Use Node.js runtime to support AI SDK (Edge runtime has issues with module evaluation during build)
+export const runtime = 'nodejs'
+// Force dynamic rendering to avoid build-time module evaluation
+export const dynamic = 'force-dynamic'
 
 /**
  * Cron endpoint to send weekly summary emails

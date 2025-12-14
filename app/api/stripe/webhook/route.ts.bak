@@ -5,9 +5,6 @@ import Stripe from 'stripe'
 
 export const runtime = 'nodejs'
 
-// Force dynamic rendering to avoid build-time module evaluation
-export const dynamic = 'force-dynamic'
-
 export async function POST(request: NextRequest) {
   const body = await request.text()
   const signature = request.headers.get('stripe-signature')

@@ -8,7 +8,10 @@ import {
 } from '@/lib/supabase/teams'
 import { supabase } from '@/lib/supabase'
 
-export const runtime = 'edge'
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
+export const runtime = 'nodejs'
 
 // GET /api/teams/[id]/members - Get all members of a team
 export async function GET(

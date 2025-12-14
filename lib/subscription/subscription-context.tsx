@@ -92,7 +92,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
     }
 
     try {
-      const { data, error } = await supabase.rpc('get_user_plan', {
+      const { data, error } = await (supabase.rpc as any)('get_user_plan', {
         user_id_param: user.id,
       })
 
@@ -173,7 +173,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
       // Fetch all metrics in parallel
       const results = await Promise.all(
         metrics.map((metric) =>
-          supabase.rpc('get_current_usage', {
+          (supabase.rpc as any)('get_current_usage', {
             user_id_param: user.id,
             metric_param: metric,
           })

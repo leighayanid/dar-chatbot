@@ -8,9 +8,6 @@ import type { UserSubscription } from '@/lib/supabase/types'
  * POST /api/subscription/cancel
  * Cancel the current user's subscription (at period end)
  */
-// Force dynamic rendering to avoid build-time module evaluation
-export const dynamic = 'force-dynamic'
-
 export async function POST(req: NextRequest) {
   try {
     // Get the authenticated user

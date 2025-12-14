@@ -10,7 +10,7 @@ import { supabase } from '@/lib/supabase'
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
 
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 
 // GET /api/invitations/[token] - Get invitation details by token
 export async function GET(

@@ -156,5 +156,26 @@ export type Database = {
         }, 'id' | 'created_at' | 'updated_at'>>
       }
     }
+    Functions: {
+      get_user_plan: {
+        Args: {
+          user_id_param: string
+        }
+        Returns: {
+          planName: string
+          displayName: string
+          status: string
+          features: any
+          trialEnd: string | null
+        }
+      }
+      get_current_usage: {
+        Args: {
+          user_id_param: string
+          metric_param: string
+        }
+        Returns: number
+      }
+    }
   }
 }

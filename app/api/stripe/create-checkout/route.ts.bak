@@ -11,9 +11,6 @@ interface CheckoutRequest {
   teamId?: string
 }
 
-// Force dynamic rendering to avoid build-time module evaluation
-export const dynamic = 'force-dynamic'
-
 export async function POST(request: NextRequest) {
   try {
     // Get authenticated user from Supabase

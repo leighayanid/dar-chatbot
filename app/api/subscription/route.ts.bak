@@ -6,9 +6,6 @@ import { getAuthUser } from '@/lib/auth/server'
  * GET /api/subscription
  * Get the current user's subscription details
  */
-// Force dynamic rendering to avoid build-time module evaluation
-export const dynamic = 'force-dynamic'
-
 export async function GET(req: NextRequest) {
   try {
     // Get the authenticated user
