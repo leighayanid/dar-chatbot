@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-sk-ant-api03-dummy-key-for-build-only-not-real-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA} next build",
     "start": "next start",
     "lint": "eslint",
     "test": "jest",
@@ -12,6 +12,7 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^2.0.56",
     "@ai-sdk/openai": "^2.0.59",
     "@ai-sdk/react": "^2.0.86",
     "@radix-ui/react-avatar": "^1.1.10",
