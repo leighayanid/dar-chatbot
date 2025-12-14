@@ -40,19 +40,17 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch('/api/teams')
 
       if (!response.ok) {
-        // Get detailed error message from response
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-        console.error('Failed to fetch teams:', response.status, errorData)
-
-        // Don't throw error for 401 (unauthorized) - just log it
+        // Don't log or throw error for 401 (unauthorized)
         // This can happen during initial load when auth is still being set up
         if (response.status === 401) {
-          console.warn('User not authenticated yet, skipping team load')
           setTeams([])
           setIsLoading(false)
           return
         }
 
+        // Get detailed error message from response for other errors
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to fetch teams:', response.status, errorData)
         throw new Error(errorData.error || 'Failed to fetch teams')
       }
 
@@ -87,16 +85,15 @@ export function TeamProvider({ children }: { children: React.ReactNode }) {
       const response = await fetch(`/api/teams/${currentTeam.id}/members`)
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-        console.error('Failed to fetch team members:', response.status, errorData)
-
-        // Don't throw error for 401 - just log it
+        // Don't log or throw error for 401 (unauthorized)
         if (response.status === 401) {
-          console.warn('User not authenticated, skipping team role load')
           setCurrentTeamRole(null)
           return
         }
 
+        // Get detailed error message from response for other errors
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.error('Failed to fetch team members:', response.status, errorData)
         throw new Error(errorData.error || 'Failed to fetch team members')
       }
 

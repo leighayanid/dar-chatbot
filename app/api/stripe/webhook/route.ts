@@ -248,18 +248,18 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  const subscriptionId = invoice.subscription as string
+  const subscriptionId = (invoice as any).subscription as string
 
   if (subscriptionId) {
     // Mark subscription as past_due
-    await supabaseServer
+    await (supabaseServer as any)
       .from('user_subscriptions')
-      .update({ status: 'past_due' })
+      .update({ status: 'past_due' } as any)
       .eq('stripe_subscription_id', subscriptionId)
 
-    await supabaseServer
+    await (supabaseServer as any)
       .from('team_subscriptions')
-      .update({ status: 'past_due' })
+      .update({ status: 'past_due' } as any)
       .eq('stripe_subscription_id', subscriptionId)
 
     console.log('Payment failed for subscription:', subscriptionId)
