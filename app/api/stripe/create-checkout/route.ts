@@ -51,20 +51,20 @@ export async function POST(request: NextRequest) {
 
     if (teamId) {
       // Team subscription
-      const { data: teamSub } = await supabaseServer
+      const { data: teamSub } = (await (supabaseServer as any)
         .from('team_subscriptions')
         .select('stripe_customer_id')
         .eq('team_id', teamId)
-        .single()
+        .single()) as any
 
       customerId = teamSub?.stripe_customer_id || null
     } else {
       // Individual subscription
-      const { data: userSub } = await supabaseServer
+      const { data: userSub } = (await (supabaseServer as any)
         .from('user_subscriptions')
         .select('stripe_customer_id')
         .eq('user_id', user.id)
-        .single()
+        .single()) as any
 
       customerId = userSub?.stripe_customer_id || null
     }
@@ -82,25 +82,25 @@ export async function POST(request: NextRequest) {
 
       // Save customer ID to database
       if (teamId) {
-        await supabaseServer
+        await (supabaseServer as any)
           .from('team_subscriptions')
           .upsert({
             team_id: teamId,
             stripe_customer_id: customerId,
-            plan_id: (await supabaseServer
+            plan_id: ((await supabaseServer
               .from('subscription_plans')
               .select('id')
               .eq('name', planName)
-              .single()).data?.id || '',
+              .single()) as any).data?.id || '',
             status: 'incomplete',
             billing_cycle: billingCycle,
             seats_total: 2, // Minimum for team plan
             seats_used: 1,
-          })
+          } as any)
       } else {
-        await supabaseServer
+        await (supabaseServer as any)
           .from('user_subscriptions')
-          .update({ stripe_customer_id: customerId })
+          .update({ stripe_customer_id: customerId } as any)
           .eq('user_id', user.id)
       }
     }

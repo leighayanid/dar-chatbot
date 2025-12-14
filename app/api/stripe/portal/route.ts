@@ -25,20 +25,20 @@ export async function POST(request: NextRequest) {
 
     if (teamId) {
       // Team billing portal
-      const { data: teamSub } = await supabaseServer
+      const { data: teamSub } = (await (supabaseServer as any)
         .from('team_subscriptions')
         .select('stripe_customer_id')
         .eq('team_id', teamId)
-        .single()
+        .single()) as any
 
       customerId = teamSub?.stripe_customer_id || null
     } else {
       // Individual billing portal
-      const { data: userSub } = await supabaseServer
+      const { data: userSub } = (await (supabaseServer as any)
         .from('user_subscriptions')
         .select('stripe_customer_id')
         .eq('user_id', user.id)
-        .single()
+        .single()) as any
 
       customerId = userSub?.stripe_customer_id || null
     }

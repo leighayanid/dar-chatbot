@@ -86,6 +86,75 @@ export type Database = {
         }
         Update: Partial<Omit<UserSubscription, 'id' | 'created_at' | 'updated_at'>>
       }
+      team_subscriptions: {
+        Row: {
+          id: string
+          team_id: string
+          plan_id: string
+          status: string
+          billing_cycle: string
+          seats_total: number
+          seats_used: number
+          current_period_start: string | null
+          current_period_end: string | null
+          trial_start: string | null
+          trial_end: string | null
+          canceled_at: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          stripe_price_id: string | null
+          billing_email: string | null
+          metadata: any
+          created_at: string
+          updated_at: string
+        }
+        Insert: Omit<{
+          id: string
+          team_id: string
+          plan_id: string
+          status: string
+          billing_cycle: string
+          seats_total: number
+          seats_used: number
+          current_period_start: string | null
+          current_period_end: string | null
+          trial_start: string | null
+          trial_end: string | null
+          canceled_at: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          stripe_price_id: string | null
+          billing_email: string | null
+          metadata: any
+          created_at: string
+          updated_at: string
+        }, 'id' | 'created_at' | 'updated_at'> & {
+          id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Omit<{
+          id: string
+          team_id: string
+          plan_id: string
+          status: string
+          billing_cycle: string
+          seats_total: number
+          seats_used: number
+          current_period_start: string | null
+          current_period_end: string | null
+          trial_start: string | null
+          trial_end: string | null
+          canceled_at: string | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          stripe_price_id: string | null
+          billing_email: string | null
+          metadata: any
+          created_at: string
+          updated_at: string
+        }, 'id' | 'created_at' | 'updated_at'>>
+      }
     }
   }
 }

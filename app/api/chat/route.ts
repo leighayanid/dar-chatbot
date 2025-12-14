@@ -44,9 +44,9 @@ export async function POST(req: Request) {
   try {
     // Get current usage
     const { data: currentUsage, error: usageError } = await supabaseServer.rpc('get_current_usage', {
-      user_id: user.id,
-      metric: 'messages',
-    });
+      user_id_param: user.id,
+      metric_param: 'messages',
+    } as any);
 
     if (usageError) {
       console.error('Error fetching usage:', usageError);
@@ -54,10 +54,9 @@ export async function POST(req: Request) {
 
     // Check if user can send more messages
     const { data: canUse, error: limitError } = await supabaseServer.rpc('check_usage_limit', {
-      user_id: user.id,
-      metric: 'messages_per_month',
-      current_usage: currentUsage || 0,
-    });
+      user_id_param: user.id,
+      metric_key: 'messages_per_month',
+    } as any);
 
     if (limitError) {
       console.error('Error checking usage limit:', limitError);
@@ -149,10 +148,10 @@ Be encouraging, supportive, and help users see the value in their daily work.`,
         // Increment usage counter
         try {
           await supabaseServer.rpc('increment_usage', {
-            user_id: user.id,
-            metric: 'messages',
-            amount: 1,
-          });
+            user_id_param: user.id,
+            metric_key: 'messages',
+            increment_by: 1,
+          } as any);
           console.log('API Route: Usage incremented for user:', user.id);
         } catch (error) {
           console.error('API Route: Error incrementing usage:', error);

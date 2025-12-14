@@ -83,11 +83,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   }
 
   // Get plan ID from database
-  const { data: plan } = await supabaseServer
+  const { data: plan } = (await (supabaseServer as any)
     .from('subscription_plans')
     .select('id')
     .eq('name', planName)
-    .single()
+    .single()) as any
 
   if (!plan) {
     console.error('Plan not found:', planName)
@@ -99,62 +99,66 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     session.subscription as string
   )
 
+  const subscriptionAny = subscription as any
+
   const subscriptionData = {
     plan_id: plan.id,
-    stripe_subscription_id: subscription.id,
-    stripe_price_id: subscription.items.data[0].price.id,
-    status: subscription.status,
+    stripe_subscription_id: subscriptionAny.id,
+    stripe_price_id: subscriptionAny.items.data[0].price.id,
+    status: subscriptionAny.status,
     billing_cycle: billingCycle || 'monthly',
-    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-    cancel_at_period_end: subscription.cancel_at_period_end,
+    current_period_start: new Date(subscriptionAny.current_period_start * 1000).toISOString(),
+    current_period_end: new Date(subscriptionAny.current_period_end * 1000).toISOString(),
+    cancel_at_period_end: subscriptionAny.cancel_at_period_end,
   }
 
   if (teamId) {
     // Update team subscription
-    await supabaseServer
+    await (supabaseServer as any)
       .from('team_subscriptions')
       .update({
         ...subscriptionData,
         seats_total: subscription.items.data[0].quantity || 2,
-      })
+      } as any)
       .eq('team_id', teamId)
   } else {
     // Update user subscription
-    await supabaseServer
+    await (supabaseServer as any)
       .from('user_subscriptions')
-      .update(subscriptionData)
+      .update(subscriptionData as any)
       .eq('user_id', userId)
   }
 
   // Log the event
-  await supabaseServer.rpc('log_subscription_event', {
+  await (supabaseServer as any).rpc('log_subscription_event', {
     p_user_id: userId,
-    p_subscription_id: subscription.id,
+    p_subscription_id: (subscription as any).id,
     p_subscription_type: teamId ? 'team' : 'user',
     p_event_type: 'subscription_created',
     p_event_data: { session_id: session.id, plan_name: planName },
     p_stripe_event_id: null,
-  })
+  } as any)
 
   console.log('Checkout completed for user:', userId, 'plan:', planName)
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
+  const subscriptionAny = subscription as any
+
   const updateData = {
-    status: subscription.status,
-    current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-    cancel_at_period_end: subscription.cancel_at_period_end,
+    status: subscriptionAny.status,
+    current_period_start: new Date(subscriptionAny.current_period_start * 1000).toISOString(),
+    current_period_end: new Date(subscriptionAny.current_period_end * 1000).toISOString(),
+    cancel_at_period_end: subscriptionAny.cancel_at_period_end,
   }
 
   // Try to update user subscription
-  const { data: userSub } = await supabaseServer
+  const { data: userSub } = (await (supabaseServer as any)
     .from('user_subscriptions')
-    .update(updateData)
+    .update(updateData as any)
     .eq('stripe_subscription_id', subscription.id)
     .select()
-    .single()
+    .single()) as any
 
   if (userSub) {
     console.log('Updated user subscription:', subscription.id)
@@ -162,15 +166,15 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   }
 
   // Try to update team subscription
-  const { data: teamSub } = await supabaseServer
+  const { data: teamSub } = (await (supabaseServer as any)
     .from('team_subscriptions')
     .update({
       ...updateData,
       seats_total: subscription.items.data[0].quantity || 2,
-    })
+    } as any)
     .eq('stripe_subscription_id', subscription.id)
     .select()
-    .single()
+    .single()) as any
 
   if (teamSub) {
     console.log('Updated team subscription:', subscription.id)
@@ -179,11 +183,11 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   // Get the free plan ID
-  const { data: freePlan } = await supabaseServer
+  const { data: freePlan } = (await (supabaseServer as any)
     .from('subscription_plans')
     .select('id')
     .eq('name', 'free')
-    .single()
+    .single()) as any
 
   if (!freePlan) {
     console.error('Free plan not found')
@@ -191,15 +195,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   // Downgrade user to free plan
-  const { data: userSub } = await supabaseServer
+  const { data: userSub } = (await (supabaseServer as any)
     .from('user_subscriptions')
     .update({
       plan_id: freePlan.id,
       status: 'canceled',
-    })
+    } as any)
     .eq('stripe_subscription_id', subscription.id)
     .select('user_id')
-    .single()
+    .single()) as any
 
   if (userSub) {
     console.log('Downgraded user to free plan:', userSub.user_id)
@@ -207,15 +211,15 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   // Downgrade team to free plan
-  const { data: teamSub } = await supabaseServer
+  const { data: teamSub } = (await (supabaseServer as any)
     .from('team_subscriptions')
     .update({
       plan_id: freePlan.id,
       status: 'canceled',
-    })
+    } as any)
     .eq('stripe_subscription_id', subscription.id)
     .select('team_id')
-    .single()
+    .single()) as any
 
   if (teamSub) {
     console.log('Downgraded team to free plan:', teamSub.team_id)
@@ -224,18 +228,18 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   // Update subscription status to active if it was past_due
-  const subscriptionId = invoice.subscription as string
+  const subscriptionId = (invoice as any).subscription as string
 
   if (subscriptionId) {
-    await supabaseServer
+    await (supabaseServer as any)
       .from('user_subscriptions')
-      .update({ status: 'active' })
+      .update({ status: 'active' } as any)
       .eq('stripe_subscription_id', subscriptionId)
       .eq('status', 'past_due')
 
-    await supabaseServer
+    await (supabaseServer as any)
       .from('team_subscriptions')
-      .update({ status: 'active' })
+      .update({ status: 'active' } as any)
       .eq('stripe_subscription_id', subscriptionId)
       .eq('status', 'past_due')
 
