@@ -17,6 +17,11 @@ export async function generateWeeklySummary(
     // Get anthropic provider
     const anthropic = await getAnthropicProvider()
 
+    // If AI is not configured, return a friendly fallback message
+    if (!anthropic) {
+      return "You've been consistently logging your accomplishments this week. Great job staying on track with your daily reflections!"
+    }
+
     // Combine all messages
     const allMessages = userMessages.join('\n\n')
 
@@ -67,6 +72,13 @@ export async function generateHighlights(
 
     // Get anthropic provider
     const anthropic = await getAnthropicProvider()
+
+    // If AI is not configured, use simple selection
+    if (!anthropic) {
+      return userMessages
+        .filter(msg => msg.length >= 20)
+        .slice(0, maxHighlights)
+    }
 
     // Use AI to select the most significant accomplishments
     const allMessages = userMessages
