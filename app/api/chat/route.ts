@@ -12,14 +12,6 @@ import { getAnthropicProvider } from "@/lib/ai/provider";
 export const dynamic = 'force-dynamic'
 
 export async function POST(req: Request) {
-  // Skip during build to avoid module evaluation errors
-  if (process.env.NEXT_PHASE === 'phase-production-build') {
-    return new Response(JSON.stringify({ error: 'Build time - route not available' }), {
-      status: 503,
-      headers: { 'Content-Type': 'application/json' },
-    })
-  }
-
   // Get user from session using proper SSR client
   const cookieStore = await cookies();
 
@@ -127,21 +119,6 @@ export async function POST(req: Request) {
 
   // Get anthropic provider
   const anthropic = await getAnthropicProvider();
-
-  // If AI is not configured, return a helpful message
-  if (!anthropic) {
-    return new Response(
-      JSON.stringify({
-        error: 'AI_NOT_CONFIGURED',
-        message: 'AI chat is currently not available. Please configure the ANTHROPIC_API_KEY environment variable to enable AI-powered conversations.',
-        suggestion: 'You can still use the app to log your daily accomplishments manually.'
-      }),
-      {
-        status: 503,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
-  }
 
   const result = streamText({
     model: anthropic("claude-3-5-sonnet-20241022"),
