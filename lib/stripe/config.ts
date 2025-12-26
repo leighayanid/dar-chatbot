@@ -1,10 +1,13 @@
 import Stripe from 'stripe'
 
-// Initialize Stripe with secret key
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-10-29.clover',
-  typescript: true,
-})
+// Initialize Stripe with secret key (uses placeholder during build)
+export const stripe = new Stripe(
+  process.env.STRIPE_SECRET_KEY || 'sk_placeholder_for_build',
+  {
+    apiVersion: '2025-10-29.clover',
+    typescript: true,
+  }
+)
 
 // Stripe price IDs for each plan and billing cycle
 // These will be created in Stripe Dashboard and added to environment variables

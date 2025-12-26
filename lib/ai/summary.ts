@@ -1,9 +1,9 @@
 import { generateText } from 'ai'
-import { getAnthropicProvider } from './provider'
+import { getOpenAIProvider } from './provider'
 
 /**
  * Generate an AI-powered summary of user accomplishments
- * Uses Claude to analyze and summarize the week's messages
+ * Uses OpenAI to analyze and summarize the week's messages
  */
 export async function generateWeeklySummary(
   userMessages: string[]
@@ -14,15 +14,15 @@ export async function generateWeeklySummary(
       return "You didn't log any accomplishments this week. Start fresh next week and capture your progress daily!"
     }
 
-    // Get anthropic provider
-    const anthropic = await getAnthropicProvider()
+    // Get OpenAI provider
+    const openai = await getOpenAIProvider()
 
     // Combine all messages
     const allMessages = userMessages.join('\n\n')
 
-    // Generate summary using Claude
+    // Generate summary using OpenAI
     const { text } = await generateText({
-      model: anthropic('claude-3-5-sonnet-20241022'),
+      model: openai('gpt-4o'),
       prompt: `You are analyzing a user's daily accomplishment logs from the past week.
 
 Your task is to create a concise, encouraging 2-3 sentence summary that:
@@ -65,8 +65,8 @@ export async function generateHighlights(
       return userMessages.filter(msg => msg.length >= 20)
     }
 
-    // Get anthropic provider
-    const anthropic = await getAnthropicProvider()
+    // Get OpenAI provider
+    const openai = await getOpenAIProvider()
 
     // Use AI to select the most significant accomplishments
     const allMessages = userMessages
@@ -74,7 +74,7 @@ export async function generateHighlights(
       .join('\n')
 
     const { text } = await generateText({
-      model: anthropic('claude-3-5-sonnet-20241022'),
+      model: openai('gpt-4o'),
       prompt: `You are selecting the top ${maxHighlights} most significant accomplishments from a user's weekly log.
 
 Criteria for significance:

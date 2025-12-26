@@ -4,13 +4,12 @@
 
 To deploy your DAR app to Vercel:
 
-### 1. Get Your Anthropic API Key
+### 1. Get Your OpenAI API Key
 
-1. Go to https://console.anthropic.com/
+1. Go to https://platform.openai.com/api-keys
 2. Sign up or log in
-3. Navigate to "API Keys"
-4. Create a new key (you get $5 free credits)
-5. Copy the key (starts with `sk-ant-`)
+3. Create a new API key
+4. Copy the key (starts with `sk-`)
 
 ### 2. Set Up Supabase (Production)
 
@@ -35,7 +34,7 @@ In Vercel Dashboard → Your Project → Settings → Environment Variables, add
 
 **Required:**
 ```
-ANTHROPIC_API_KEY=sk-ant-your-key-here
+OPENAI_API_KEY=sk-your-key-here
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
@@ -69,7 +68,7 @@ vercel
 
 | Variable | Purpose | Required? |
 |----------|---------|-----------|
-| `ANTHROPIC_API_KEY` | AI chat & summaries | ✅ Yes |
+| `OPENAI_API_KEY` | AI chat & summaries | ✅ Yes |
 | `NEXT_PUBLIC_SUPABASE_URL` | Database connection | ✅ Yes |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Client-side DB auth | ✅ Yes |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-side DB access | ✅ Yes |
@@ -83,7 +82,7 @@ vercel
 
 ### Build fails with "Neither apiKey nor config.authenticator provided"
 
-**Solution:** Make sure `ANTHROPIC_API_KEY` is set in Vercel environment variables.
+**Solution:** Make sure `OPENAI_API_KEY` and `STRIPE_SECRET_KEY` are set in Vercel environment variables (or use placeholder values during build if not using Stripe).
 
 ### Database connection errors
 
@@ -131,7 +130,7 @@ View cron status: Vercel Dashboard → Your Project → Cron
 
 Before deploying, ensure you have:
 
-- [ ] Anthropic API key from console.anthropic.com
+- [ ] OpenAI API key from platform.openai.com
 - [ ] Production Supabase project set up
 - [ ] All required environment variables added to Vercel
 - [ ] Database migrations pushed (`supabase db push`)

@@ -1,27 +1,22 @@
 /**
  * Wrapper for AI provider with lazy loading
+ * Uses createOpenAI to defer API key validation until runtime
  */
 
-let cachedProvider: any = null
+import { createOpenAI } from '@ai-sdk/openai'
 
-export async function getAnthropicProvider() {
-  // Return cached provider if available
-  if (cachedProvider) {
-    return cachedProvider
-  }
+// Create provider with explicit API key - uses placeholder during build
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY || 'sk-placeholder-for-build',
+})
 
-  // Dynamically import the Anthropic provider
-  const { anthropic } = await import('@ai-sdk/anthropic')
-
-  // Cache the provider
-  cachedProvider = anthropic
-
-  return anthropic
+export async function getOpenAIProvider() {
+  return openai
 }
 
 /**
  * Check if AI features are available
  */
 export function isAIEnabled(): boolean {
-  return !!process.env.ANTHROPIC_API_KEY
+  return !!process.env.OPENAI_API_KEY
 }

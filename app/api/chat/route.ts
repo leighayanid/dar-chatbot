@@ -3,7 +3,7 @@ import { createMessageServer } from "@/lib/supabase";
 import { createServerClient } from "@supabase/ssr";
 import { supabaseServer } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
-import { getAnthropicProvider } from "@/lib/ai/provider";
+import { getOpenAIProvider } from "@/lib/ai/provider";
 
 // Note: Using Node.js runtime to access SUPABASE_SERVICE_ROLE_KEY
 // Edge runtime doesn't have access to non-NEXT_PUBLIC_ environment variables
@@ -117,11 +117,11 @@ export async function POST(req: Request) {
     console.warn('API Route: Missing userMessage or conversationId');
   }
 
-  // Get anthropic provider
-  const anthropic = await getAnthropicProvider();
+  // Get OpenAI provider
+  const openai = await getOpenAIProvider();
 
   const result = streamText({
-    model: anthropic("claude-3-5-sonnet-20241022"),
+    model: openai("gpt-4o"),
     system: `You are a helpful assistant for a Daily Accomplishment Report app.
 
 Your role is to:
