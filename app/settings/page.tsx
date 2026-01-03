@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth/auth-context'
 import { supabase } from '@/lib/supabase'
-import { UserIcon, SaveIcon, Loader2Icon, BellIcon, MonitorIcon, ZoomInIcon, ZoomOutIcon, MaximizeIcon, TrashIcon, AlertTriangleIcon } from 'lucide-react'
+import { UserIcon, SaveIcon, Loader2Icon, BellIcon, MonitorIcon, ZoomInIcon, ZoomOutIcon, MaximizeIcon, TrashIcon, AlertTriangleIcon, MenuIcon, XIcon } from 'lucide-react'
 import Link from 'next/link'
 import { AppHeader } from '@/components/app-header'
 import { useUISize, type UISize } from '@/contexts/ui-size-context'
@@ -38,6 +38,7 @@ export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState('profile')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [profile, setProfile] = useState<UserProfile>({
     full_name: '',
     avatar_url: '',
@@ -319,65 +320,104 @@ export default function SettingsPage() {
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       <AppHeader />
 
-      <div className="flex-1 overflow-y-auto px-3 py-6">
+      <div className="flex-1 overflow-y-auto px-3 py-6 pb-safe-bottom">
         <div className="mx-auto max-w-7xl">
           {/* Header */}
           <div className="mb-6">
-            <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
-              Settings
-            </h1>
-            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
-              Manage your profile and account preferences
-            </p>
+            <div className="flex items-center gap-3">
+              {/* Mobile menu toggle */}
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="rounded-lg bg-zinc-100 p-2 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 md:hidden"
+                aria-label="Toggle navigation menu"
+              >
+                {sidebarOpen ? (
+                  <XIcon className="size-5 text-zinc-700 dark:text-zinc-300" />
+                ) : (
+                  <MenuIcon className="size-5 text-zinc-700 dark:text-zinc-300" />
+                )}
+              </button>
+              <div>
+                <h1 className="bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-2xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50 sm:text-3xl">
+                  Settings
+                </h1>
+                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                  Manage your profile and account preferences
+                </p>
+              </div>
+            </div>
           </div>
 
         {/* Layout with Sidebar */}
-        <div className="flex gap-6">
+        <div className="relative flex gap-6">
+          {/* Mobile overlay */}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 z-20 bg-black/60 backdrop-blur-sm transition-all md:hidden"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
+
           {/* Sidebar */}
-          <aside className="w-56 shrink-0">
-            <nav className="sticky top-8 space-y-1 rounded-xl border border-zinc-200 bg-white/80 p-2 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+          <aside className={`${
+            sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+          } fixed left-0 top-0 z-30 h-full w-72 shrink-0 bg-white pt-safe-top transition-transform duration-300 dark:bg-zinc-900 md:relative md:z-auto md:h-auto md:w-56 md:bg-transparent md:pt-0 dark:md:bg-transparent`}>
+            {/* Mobile sidebar header */}
+            <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-4 dark:border-zinc-800 md:hidden">
+              <h2 className="bg-gradient-to-r from-rose-500 to-orange-500 bg-clip-text text-lg font-bold text-transparent">
+                Settings
+              </h2>
               <button
-                onClick={() => setActiveSection('profile')}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
+                onClick={() => setSidebarOpen(false)}
+                className="rounded-lg bg-zinc-100 p-2 transition-colors hover:bg-zinc-200 active:bg-zinc-300 dark:bg-zinc-800 dark:hover:bg-zinc-700 dark:active:bg-zinc-600"
+                aria-label="Close navigation menu"
+              >
+                <XIcon className="size-5 text-zinc-700 dark:text-zinc-300" />
+              </button>
+            </div>
+            <nav className="sticky top-8 mx-4 mt-4 space-y-1 rounded-xl border border-zinc-200 bg-white/80 p-2 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80 md:mx-0 md:mt-0">
+              <button
+                onClick={() => { setActiveSection('profile'); setSidebarOpen(false); }}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-base font-medium transition-all active:scale-[0.98] md:gap-2 md:py-2 md:text-sm ${
                   activeSection === 'profile'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <UserIcon className="size-4" />
+                <UserIcon className="size-5 md:size-4" />
                 Profile
               </button>
               <button
-                onClick={() => setActiveSection('appearance')}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
+                onClick={() => { setActiveSection('appearance'); setSidebarOpen(false); }}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-base font-medium transition-all active:scale-[0.98] md:gap-2 md:py-2 md:text-sm ${
                   activeSection === 'appearance'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <MonitorIcon className="size-4" />
+                <MonitorIcon className="size-5 md:size-4" />
                 Appearance
               </button>
               <button
-                onClick={() => setActiveSection('notifications')}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
+                onClick={() => { setActiveSection('notifications'); setSidebarOpen(false); }}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-base font-medium transition-all active:scale-[0.98] md:gap-2 md:py-2 md:text-sm ${
                   activeSection === 'notifications'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <BellIcon className="size-4" />
+                <BellIcon className="size-5 md:size-4" />
                 Notifications
               </button>
               <button
-                onClick={() => setActiveSection('account')}
-                className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium transition-all ${
+                onClick={() => { setActiveSection('account'); setSidebarOpen(false); }}
+                className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-base font-medium transition-all active:scale-[0.98] md:gap-2 md:py-2 md:text-sm ${
                   activeSection === 'account'
                     ? 'bg-gradient-to-r from-rose-400 to-orange-400 text-white shadow-lg'
                     : 'text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800'
                 }`}
               >
-                <AlertTriangleIcon className="size-4" />
+                <AlertTriangleIcon className="size-5 md:size-4" />
                 Account
               </button>
             </nav>
@@ -859,11 +899,11 @@ export default function SettingsPage() {
                             </ul>
                           </div>
 
-                          <div className="flex gap-3">
+                          <div className="flex flex-col gap-3 sm:flex-row">
                             <button
                               type="button"
                               onClick={() => setShowDeleteConfirm(false)}
-                              className="flex-1 rounded-xl bg-zinc-200 px-6 py-3 font-semibold text-zinc-700 transition-all hover:bg-zinc-300 dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600"
+                              className="order-2 flex-1 rounded-xl bg-zinc-200 px-6 py-3.5 font-semibold text-zinc-700 transition-all hover:bg-zinc-300 active:scale-[0.98] dark:bg-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-600 sm:order-1 sm:py-3"
                             >
                               Cancel
                             </button>
@@ -871,7 +911,7 @@ export default function SettingsPage() {
                               type="button"
                               onClick={handleDeleteAccount}
                               disabled={deleteLoading}
-                              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3 font-semibold text-white transition-all hover:bg-red-700 disabled:opacity-50 dark:bg-red-500 dark:hover:bg-red-600"
+                              className="order-1 flex flex-1 items-center justify-center gap-2 rounded-xl bg-red-600 px-6 py-3.5 font-semibold text-white transition-all hover:bg-red-700 active:scale-[0.98] disabled:opacity-50 dark:bg-red-500 dark:hover:bg-red-600 sm:order-2 sm:py-3"
                             >
                               {deleteLoading ? (
                                 <>
@@ -895,17 +935,17 @@ export default function SettingsPage() {
 
               {/* Save Button - Show for Profile, Appearance, and Notifications */}
               {activeSection !== 'account' && (
-              <div className="flex justify-end gap-3 pt-6">
+              <div className="flex flex-col-reverse gap-3 pt-6 sm:flex-row sm:justify-end">
                 <Link
                   href="/dashboard"
-                  className="rounded-xl bg-zinc-100 px-6 py-3 font-semibold text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  className="flex items-center justify-center rounded-xl bg-zinc-100 px-6 py-3.5 font-semibold text-zinc-700 transition-all hover:bg-zinc-200 active:scale-[0.98] dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700 sm:py-3"
                 >
                   Cancel
                 </Link>
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-6 py-3.5 font-semibold text-white shadow-lg transition-all hover:shadow-xl active:scale-[0.98] disabled:opacity-50 sm:py-3"
                 >
                   {saving ? (
                     <>
