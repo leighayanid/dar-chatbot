@@ -71,20 +71,20 @@ export default function LoginPage() {
 
       <div className="flex w-full flex-col lg:flex-row">
         {/* Left Column - Form */}
-        <div className="flex w-full items-center justify-center p-8 lg:w-1/2 lg:p-12">
+        <div className="flex w-full items-center justify-center p-5 sm:p-8 lg:w-1/2 lg:p-12">
           <div className="w-full max-w-md">
             {/* Header */}
-            <div className="mb-8">
-              <h1 className="mb-2 bg-gradient-to-r from-rose-600 via-orange-500 to-amber-500 bg-clip-text text-4xl font-bold tracking-tight text-transparent">
+            <div className="mb-5 sm:mb-8">
+              <h1 className="mb-1.5 bg-gradient-to-r from-rose-600 via-orange-500 to-amber-500 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:mb-2 sm:text-4xl">
                 Welcome Back
               </h1>
-              <p className="text-lg font-medium text-zinc-600 dark:text-zinc-400">
+              <p className="text-sm font-medium text-zinc-600 sm:text-lg dark:text-zinc-400">
                 Sign in to continue tracking your achievements
               </p>
             </div>
 
             {/* Auth Form */}
-            <div className="rounded-2xl border border-zinc-200 bg-white/80 p-8 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="rounded-xl border border-zinc-200 bg-white/80 p-5 shadow-xl backdrop-blur-xl sm:rounded-2xl sm:p-8 dark:border-zinc-800 dark:bg-zinc-900/80">
               <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Error Message */}
                 {error && (
@@ -169,8 +169,8 @@ export default function LoginPage() {
             </div>
 
             {/* Footer */}
-            <div className="mt-6 space-y-3 text-center">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="mt-4 space-y-2 text-center sm:mt-6 sm:space-y-3">
+              <p className="text-xs text-zinc-600 sm:text-sm dark:text-zinc-400">
                 Don't have an account?{' '}
                 <Link
                   href="/register"
@@ -179,7 +179,7 @@ export default function LoginPage() {
                   Create one here
                 </Link>
               </p>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              <p className="text-[10px] text-zinc-500 sm:text-xs dark:text-zinc-400">
                 By continuing, you agree to our Terms of Service and Privacy Policy
               </p>
             </div>

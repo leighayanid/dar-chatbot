@@ -240,46 +240,46 @@ export default function TasksPage() {
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       <AppHeader />
 
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="mx-auto max-w-7xl py-8">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+        <div className="mx-auto max-w-7xl py-4 sm:py-8">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+          <div className="mb-4 sm:mb-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
+                <h1 className="mb-1 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:mb-2 sm:text-4xl dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
                   Tasks & Todos
                 </h1>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                <p className="text-xs font-medium text-zinc-600 sm:text-sm dark:text-zinc-400">
                   Manage your daily tasks and track your progress
                 </p>
               </div>
               <button
                 onClick={() => setShowModal(true)}
-                className="group rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                className="group w-full rounded-lg bg-gradient-to-r from-rose-400 to-orange-400 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 sm:w-auto sm:rounded-xl sm:px-6 sm:py-3 sm:text-base"
               >
-                <PlusIcon className="mr-2 inline size-5" />
+                <PlusIcon className="mr-1.5 inline size-4 sm:mr-2 sm:size-5" />
                 New Task
               </button>
             </div>
           </div>
 
         {/* Stats */}
-        <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <p className="mb-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Total Tasks</p>
-            <p className="text-4xl font-bold text-zinc-900 dark:text-zinc-50">{stats.total}</p>
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:mb-8 sm:gap-6 lg:grid-cols-4">
+          <div className="rounded-lg border border-zinc-200 bg-white/80 p-3 shadow-lg backdrop-blur-xl sm:rounded-2xl sm:p-6 sm:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <p className="mb-1 text-xs font-medium text-zinc-600 sm:mb-2 sm:text-sm dark:text-zinc-400">Total Tasks</p>
+            <p className="text-2xl font-bold text-zinc-900 sm:text-4xl dark:text-zinc-50">{stats.total}</p>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <p className="mb-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Pending</p>
-            <p className="text-4xl font-bold text-amber-600 dark:text-amber-400">{stats.pending}</p>
+          <div className="rounded-lg border border-zinc-200 bg-white/80 p-3 shadow-lg backdrop-blur-xl sm:rounded-2xl sm:p-6 sm:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <p className="mb-1 text-xs font-medium text-zinc-600 sm:mb-2 sm:text-sm dark:text-zinc-400">Pending</p>
+            <p className="text-2xl font-bold text-amber-600 sm:text-4xl dark:text-amber-400">{stats.pending}</p>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <p className="mb-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">In Progress</p>
-            <p className="text-4xl font-bold text-blue-600 dark:text-blue-400">{stats.inProgress}</p>
+          <div className="rounded-lg border border-zinc-200 bg-white/80 p-3 shadow-lg backdrop-blur-xl sm:rounded-2xl sm:p-6 sm:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <p className="mb-1 text-xs font-medium text-zinc-600 sm:mb-2 sm:text-sm dark:text-zinc-400">In Progress</p>
+            <p className="text-2xl font-bold text-blue-600 sm:text-4xl dark:text-blue-400">{stats.inProgress}</p>
           </div>
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <p className="mb-2 text-sm font-medium text-zinc-600 dark:text-zinc-400">Completed</p>
-            <p className="text-4xl font-bold text-green-600 dark:text-green-400">{stats.completed}</p>
+          <div className="rounded-lg border border-zinc-200 bg-white/80 p-3 shadow-lg backdrop-blur-xl sm:rounded-2xl sm:p-6 sm:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <p className="mb-1 text-xs font-medium text-zinc-600 sm:mb-2 sm:text-sm dark:text-zinc-400">Completed</p>
+            <p className="text-2xl font-bold text-green-600 sm:text-4xl dark:text-green-400">{stats.completed}</p>
           </div>
         </div>
 

@@ -580,7 +580,7 @@ export default function SettingsPage() {
                     Choose how compact or spacious you want the interface
                   </p>
 
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-2 sm:gap-3 sm:grid-cols-3">
                     {/* Compact */}
                     <button
                       type="button"
@@ -588,7 +588,7 @@ export default function SettingsPage() {
                         setPreferences({ ...preferences, ui_size: 'compact' })
                         setUISize('compact')
                       }}
-                      className={`group relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all ${
+                      className={`group relative overflow-hidden rounded-lg border-2 p-3 text-left transition-all sm:rounded-xl sm:p-4 ${
                         preferences.ui_size === 'compact'
                           ? 'border-purple-400 bg-purple-50 dark:border-purple-500 dark:bg-purple-950/30'
                           : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600'
@@ -596,27 +596,27 @@ export default function SettingsPage() {
                     >
                       {preferences.ui_size === 'compact' && (
                         <div className="absolute right-2 top-2">
-                          <div className="rounded-full bg-purple-400 p-1">
-                            <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="rounded-full bg-purple-400 p-0.5 sm:p-1">
+                            <svg className="size-2.5 text-white sm:size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
                           </div>
                         </div>
                       )}
-                      <div className="mb-2 flex items-center gap-2">
-                        <ZoomOutIcon className={`size-5 ${
+                      <div className="mb-1.5 flex items-center gap-2 sm:mb-2">
+                        <ZoomOutIcon className={`size-4 sm:size-5 ${
                           preferences.ui_size === 'compact' ? 'text-purple-600 dark:text-purple-400' : 'text-zinc-600 dark:text-zinc-400'
                         }`} />
-                        <span className={`font-semibold ${
+                        <span className={`text-sm font-semibold sm:text-base ${
                           preferences.ui_size === 'compact' ? 'text-purple-900 dark:text-purple-200' : 'text-zinc-900 dark:text-zinc-100'
                         }`}>
                           Compact
                         </span>
                       </div>
-                      <p className={`text-xs ${
+                      <p className={`text-[11px] leading-tight sm:text-xs ${
                         preferences.ui_size === 'compact' ? 'text-purple-700 dark:text-purple-300' : 'text-zinc-600 dark:text-zinc-400'
                       }`}>
-                        More content, less spacing. Best for small screens and power users.
+                        More content, less spacing.
                       </p>
                     </button>
 
@@ -627,7 +627,7 @@ export default function SettingsPage() {
                         setPreferences({ ...preferences, ui_size: 'default' })
                         setUISize('default')
                       }}
-                      className={`group relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all ${
+                      className={`group relative overflow-hidden rounded-lg border-2 p-3 text-left transition-all sm:rounded-xl sm:p-4 ${
                         preferences.ui_size === 'default'
                           ? 'border-purple-400 bg-purple-50 dark:border-purple-500 dark:bg-purple-950/30'
                           : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600'
@@ -635,27 +635,27 @@ export default function SettingsPage() {
                     >
                       {preferences.ui_size === 'default' && (
                         <div className="absolute right-2 top-2">
-                          <div className="rounded-full bg-purple-400 p-1">
-                            <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="rounded-full bg-purple-400 p-0.5 sm:p-1">
+                            <svg className="size-2.5 text-white sm:size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
                           </div>
                         </div>
                       )}
-                      <div className="mb-2 flex items-center gap-2">
-                        <MaximizeIcon className={`size-5 ${
+                      <div className="mb-1.5 flex items-center gap-2 sm:mb-2">
+                        <MaximizeIcon className={`size-4 sm:size-5 ${
                           preferences.ui_size === 'default' ? 'text-purple-600 dark:text-purple-400' : 'text-zinc-600 dark:text-zinc-400'
                         }`} />
-                        <span className={`font-semibold ${
+                        <span className={`text-sm font-semibold sm:text-base ${
                           preferences.ui_size === 'default' ? 'text-purple-900 dark:text-purple-200' : 'text-zinc-900 dark:text-zinc-100'
                         }`}>
                           Default
                         </span>
                       </div>
-                      <p className={`text-xs ${
+                      <p className={`text-[11px] leading-tight sm:text-xs ${
                         preferences.ui_size === 'default' ? 'text-purple-700 dark:text-purple-300' : 'text-zinc-600 dark:text-zinc-400'
                       }`}>
-                        Balanced experience. Comfortable for most users and screen sizes.
+                        Balanced for most screens.
                       </p>
                     </button>
 
@@ -666,7 +666,7 @@ export default function SettingsPage() {
                         setPreferences({ ...preferences, ui_size: 'comfortable' })
                         setUISize('comfortable')
                       }}
-                      className={`group relative overflow-hidden rounded-xl border-2 p-4 text-left transition-all ${
+                      className={`group relative overflow-hidden rounded-lg border-2 p-3 text-left transition-all sm:rounded-xl sm:p-4 ${
                         preferences.ui_size === 'comfortable'
                           ? 'border-purple-400 bg-purple-50 dark:border-purple-500 dark:bg-purple-950/30'
                           : 'border-zinc-200 bg-white hover:border-zinc-300 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600'
@@ -674,27 +674,27 @@ export default function SettingsPage() {
                     >
                       {preferences.ui_size === 'comfortable' && (
                         <div className="absolute right-2 top-2">
-                          <div className="rounded-full bg-purple-400 p-1">
-                            <svg className="size-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <div className="rounded-full bg-purple-400 p-0.5 sm:p-1">
+                            <svg className="size-2.5 text-white sm:size-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
                           </div>
                         </div>
                       )}
-                      <div className="mb-2 flex items-center gap-2">
-                        <ZoomInIcon className={`size-5 ${
+                      <div className="mb-1.5 flex items-center gap-2 sm:mb-2">
+                        <ZoomInIcon className={`size-4 sm:size-5 ${
                           preferences.ui_size === 'comfortable' ? 'text-purple-600 dark:text-purple-400' : 'text-zinc-600 dark:text-zinc-400'
                         }`} />
-                        <span className={`font-semibold ${
+                        <span className={`text-sm font-semibold sm:text-base ${
                           preferences.ui_size === 'comfortable' ? 'text-purple-900 dark:text-purple-200' : 'text-zinc-900 dark:text-zinc-100'
                         }`}>
                           Comfortable
                         </span>
                       </div>
-                      <p className={`text-xs ${
+                      <p className={`text-[11px] leading-tight sm:text-xs ${
                         preferences.ui_size === 'comfortable' ? 'text-purple-700 dark:text-purple-300' : 'text-zinc-600 dark:text-zinc-400'
                       }`}>
-                        Larger text, generous spacing. Better accessibility and readability.
+                        Larger text, generous spacing.
                       </p>
                     </button>
                   </div>

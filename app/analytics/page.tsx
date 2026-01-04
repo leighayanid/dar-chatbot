@@ -276,29 +276,29 @@ export default function AnalyticsPage() {
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       <AppHeader />
 
-      <div className="flex-1 overflow-y-auto p-3">
-        <div className="mx-auto max-w-7xl py-6">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+        <div className="mx-auto max-w-7xl py-3 sm:py-6">
           {/* Header */}
-          <div className="mb-6">
-            <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
+          <div className="mb-4 sm:mb-6">
+            <h1 className="mb-1 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-xl font-bold tracking-tight text-transparent sm:mb-2 sm:text-3xl dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
               Analytics Dashboard
             </h1>
-            <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+            <p className="text-xs font-medium text-zinc-600 sm:text-sm dark:text-zinc-400">
               Track your productivity and accomplishment patterns
             </p>
           </div>
 
         {/* Stats Grid */}
-        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-2 sm:mb-6 sm:gap-4 lg:grid-cols-4">
           {/* Total Messages */}
-          <div className="rounded-xl border border-zinc-200 bg-white/80 p-4 shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <div className="mb-2 flex items-center gap-2">
-              <div className="rounded-lg bg-gradient-to-br from-blue-400 to-cyan-400 p-2">
-                <MessageSquareIcon className="size-4 text-white" />
+          <div className="rounded-lg border border-zinc-200 bg-white/80 p-3 shadow-lg backdrop-blur-xl sm:rounded-xl sm:p-4 sm:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/80">
+            <div className="mb-1.5 flex items-center gap-1.5 sm:mb-2 sm:gap-2">
+              <div className="rounded-md bg-gradient-to-br from-blue-400 to-cyan-400 p-1.5 sm:rounded-lg sm:p-2">
+                <MessageSquareIcon className="size-3 text-white sm:size-4" />
               </div>
               <div>
-                <p className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Total Entries</p>
-                <p className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">{stats.totalMessages}</p>
+                <p className="text-[10px] font-medium text-zinc-600 sm:text-xs dark:text-zinc-400">Total Entries</p>
+                <p className="text-lg font-bold text-zinc-900 sm:text-2xl dark:text-zinc-50">{stats.totalMessages}</p>
               </div>
             </div>
             <p className="text-xs text-zinc-500 dark:text-zinc-400">

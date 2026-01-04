@@ -637,30 +637,58 @@ export default function Home() {
       <AppHeader
         children={
           /* View Toggle Tabs */
-          <div className="hidden items-center gap-1 rounded-xl bg-zinc-100 p-1 md:flex dark:bg-zinc-800">
-            <button
-              onClick={() => setViewMode("chat")}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                viewMode === "chat"
-                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
-                  : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
-              }`}
-            >
-              <MessageSquareIcon className="size-4" />
-              Chat
-            </button>
-            <button
-              onClick={() => setViewMode("summary")}
-              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                viewMode === "summary"
-                  ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
-                  : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
-              }`}
-            >
-              <BarChart3Icon className="size-4" />
-              Summary
-            </button>
-          </div>
+          <>
+            {/* Mobile View Toggle */}
+            <div className="flex items-center gap-1 rounded-lg bg-zinc-100 p-0.5 md:hidden dark:bg-zinc-800">
+              <button
+                onClick={() => setViewMode("chat")}
+                className={`rounded-md p-2 transition-all ${
+                  viewMode === "chat"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+                aria-label="Chat view"
+              >
+                <MessageSquareIcon className="size-4" />
+              </button>
+              <button
+                onClick={() => setViewMode("summary")}
+                className={`rounded-md p-2 transition-all ${
+                  viewMode === "summary"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+                aria-label="Summary view"
+              >
+                <BarChart3Icon className="size-4" />
+              </button>
+            </div>
+            {/* Desktop View Toggle */}
+            <div className="hidden items-center gap-1 rounded-xl bg-zinc-100 p-1 md:flex dark:bg-zinc-800">
+              <button
+                onClick={() => setViewMode("chat")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                  viewMode === "chat"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+              >
+                <MessageSquareIcon className="size-4" />
+                Chat
+              </button>
+              <button
+                onClick={() => setViewMode("summary")}
+                className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                  viewMode === "summary"
+                    ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-50"
+                    : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                }`}
+              >
+                <BarChart3Icon className="size-4" />
+                Summary
+              </button>
+            </div>
+          </>
         }
         actions={
           messages.length > 0 ? (
@@ -938,8 +966,8 @@ export default function Home() {
         )}
 
         {/* Input Area - Fixed at bottom */}
-        <div className="flex-shrink-0 border-t border-zinc-200/60 bg-white/80 backdrop-blur-xl p-5 dark:border-zinc-800/60 dark:bg-zinc-900/80">
-          <div className="rounded-2xl bg-gradient-to-br from-zinc-50 to-zinc-100 p-1 shadow-lg dark:from-zinc-800 dark:to-zinc-900">
+        <div className="flex-shrink-0 border-t border-zinc-200/60 bg-white/80 p-3 backdrop-blur-xl sm:p-5 dark:border-zinc-800/60 dark:bg-zinc-900/80">
+          <div className="rounded-xl bg-gradient-to-br from-zinc-50 to-zinc-100 p-1 shadow-lg sm:rounded-2xl dark:from-zinc-800 dark:to-zinc-900">
             <PromptInput
               onSubmit={(message, event) => {
                 event.preventDefault();
@@ -955,18 +983,18 @@ export default function Home() {
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="What did you accomplish today? Type / for templates (Cmd/Ctrl+K to focus, Cmd/Ctrl+Enter to send)"
-                  className="min-h-[60px] resize-none rounded-xl border-0 bg-white px-4 py-3 text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
+                  placeholder="What did you accomplish today? Type / for templates..."
+                  className="min-h-[50px] resize-none rounded-xl border-0 bg-white px-3 py-2.5 text-sm text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-blue-500 sm:min-h-[60px] sm:px-4 sm:py-3 sm:text-base dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-400"
                 />
               </PromptInputBody>
-              <PromptInputFooter className="flex items-center justify-between px-3 pb-2">
-                <div className="flex items-center gap-2">
+              <PromptInputFooter className="flex items-center justify-between px-2 pb-2 sm:px-3">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <PromptInputTools />
                   {isSupported && (
                     <button
                       type="button"
                       onClick={toggleVoiceRecording}
-                      className={`rounded-lg p-2 transition-all hover:scale-105 active:scale-95 ${
+                      className={`rounded-lg p-1.5 transition-all hover:scale-105 active:scale-95 sm:p-2 ${
                         isListening
                           ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                           : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600'
@@ -983,7 +1011,7 @@ export default function Home() {
                 </div>
                 <PromptInputSubmit
                   status={status}
-                  className="rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:hover:scale-100"
+                  className="rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-lg active:scale-95 disabled:opacity-50 disabled:hover:scale-100 sm:rounded-xl sm:px-5 sm:py-2.5 sm:text-base"
                 />
               </PromptInputFooter>
             </PromptInput>
@@ -1068,37 +1096,37 @@ export default function Home() {
 
       {/* Export Preview Modal */}
       {showPreview && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-zinc-900">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-2 backdrop-blur-sm sm:p-4">
+          <div className="relative max-h-[95vh] w-full max-w-5xl overflow-hidden rounded-xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl dark:bg-zinc-900">
             {/* Modal Header */}
-            <div className="sticky top-0 border-b border-zinc-200 bg-white/95 backdrop-blur-xl px-6 py-5 dark:border-zinc-800 dark:bg-zinc-900/95">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+            <div className="sticky top-0 border-b border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur-xl sm:px-6 sm:py-5 dark:border-zinc-800 dark:bg-zinc-900/95">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <h2 className="truncate text-lg font-bold text-zinc-900 sm:text-2xl dark:text-zinc-50">
                     Export Preview
                   </h2>
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="mt-0.5 hidden text-sm text-zinc-600 sm:mt-1 sm:block dark:text-zinc-400">
                     Review your report before exporting to DOCX
                   </p>
                 </div>
                 <button
                   onClick={() => setShowPreview(false)}
-                  className="group rounded-xl bg-zinc-100 p-2.5 text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  className="group shrink-0 rounded-lg bg-zinc-100 p-2 text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 sm:rounded-xl sm:p-2.5 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
                   title="Close preview"
                 >
-                  <XIcon className="size-5 transition-transform group-hover:rotate-90" />
+                  <XIcon className="size-4 transition-transform group-hover:rotate-90 sm:size-5" />
                 </button>
               </div>
             </div>
 
             {/* Modal Content - Scrollable */}
-            <div className="overflow-y-auto p-4" style={{ maxHeight: 'calc(90vh - 180px)' }}>
+            <div className="overflow-y-auto p-3 sm:p-4" style={{ maxHeight: 'calc(95vh - 140px)' }}>
               {/* Report Header Preview */}
-              <div className="mb-6 text-center">
-                <h1 className="mb-2 text-3xl font-bold text-zinc-900 dark:text-zinc-50">
+              <div className="mb-4 text-center sm:mb-6">
+                <h1 className="mb-1 text-xl font-bold text-zinc-900 sm:mb-2 sm:text-3xl dark:text-zinc-50">
                   Daily Accomplishment Report
                 </h1>
-                <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                <p className="text-xs text-zinc-600 sm:text-sm dark:text-zinc-400">
                   Generated on{" "}
                   {new Date().toLocaleString("en-US", {
                     month: "long",
@@ -1111,8 +1139,8 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Table Preview */}
-              <div className="overflow-x-auto rounded-xl border border-zinc-200 shadow-lg dark:border-zinc-700">
+              {/* Table Preview - Card view on mobile */}
+              <div className="hidden overflow-x-auto rounded-xl border border-zinc-200 shadow-lg sm:block dark:border-zinc-700">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-gradient-to-r from-indigo-600 to-indigo-700">
@@ -1177,28 +1205,72 @@ export default function Home() {
                 </table>
               </div>
 
+              {/* Mobile Card View */}
+              <div className="space-y-3 sm:hidden">
+                {messages.map((message) => {
+                  const msg = message as any;
+                  const timestamp = msg.createdAt
+                    ? new Date(msg.createdAt).toLocaleString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })
+                    : "N/A";
+                  const role = message.role === "user" ? "You" : "AI";
+                  let content = "";
+                  if (message.parts && Array.isArray(message.parts)) {
+                    content = message.parts.map((part: any) => part.text || "").join(" ");
+                  } else if (msg.content) {
+                    content = msg.content;
+                  }
+
+                  return (
+                    <div
+                      key={message.id}
+                      className="rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-800"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                            message.role === "user"
+                              ? "bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300"
+                              : "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300"
+                          }`}
+                        >
+                          {role}
+                        </span>
+                        <span className="text-xs text-zinc-500 dark:text-zinc-400">{timestamp}</span>
+                      </div>
+                      <p className="line-clamp-3 text-sm text-zinc-700 dark:text-zinc-300">{content}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
               {/* Info Note */}
-              <div className="mt-4 rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:bg-blue-950/30 dark:text-blue-300">
-                <strong>Note:</strong> This preview shows how your data will be organized in the DOCX file. The actual
-                document will be formatted for 8.5 x 13 inch paper with professional styling.
+              <div className="mt-3 rounded-lg bg-blue-50 px-3 py-2 text-xs text-blue-800 sm:mt-4 sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm dark:bg-blue-950/30 dark:text-blue-300">
+                <strong>Note:</strong> This preview shows how your data will be organized in the DOCX file.
               </div>
             </div>
 
             {/* Modal Footer - Sticky */}
-            <div className="sticky bottom-0 border-t border-zinc-200 bg-white/95 backdrop-blur-xl px-6 py-4 dark:border-zinc-800 dark:bg-zinc-900/95">
-              <div className="flex items-center justify-end gap-3">
+            <div className="sticky bottom-0 border-t border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur-xl sm:px-6 sm:py-4 dark:border-zinc-800 dark:bg-zinc-900/95">
+              <div className="flex items-center justify-end gap-2 sm:gap-3">
                 <button
                   onClick={() => setShowPreview(false)}
-                  className="rounded-xl bg-zinc-100 px-5 py-2.5 font-semibold text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
+                  className="rounded-lg bg-zinc-100 px-4 py-2 text-sm font-semibold text-zinc-700 transition-all hover:scale-105 hover:bg-zinc-200 active:scale-95 sm:rounded-xl sm:px-5 sm:py-2.5 sm:text-base dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={exportReport}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 px-5 py-2.5 font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg active:scale-95"
+                  className="flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition-all hover:scale-105 hover:from-green-700 hover:to-emerald-700 hover:shadow-lg active:scale-95 sm:gap-2 sm:rounded-xl sm:px-5 sm:py-2.5 sm:text-base"
                 >
                   <FileDownIcon className="size-4" />
-                  Export DOCX
+                  <span className="hidden sm:inline">Export DOCX</span>
+                  <span className="sm:hidden">Export</span>
                 </button>
               </div>
             </div>

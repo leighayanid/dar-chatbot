@@ -201,24 +201,24 @@ export default function ReportsPage() {
     <div className="flex min-h-screen flex-col bg-gradient-to-br from-zinc-50 via-white to-zinc-100 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950">
       <AppHeader />
 
-      <div className="flex-1 overflow-y-auto p-4">
-        <div className="mx-auto max-w-7xl py-8">
+      <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+        <div className="mx-auto max-w-7xl py-4 sm:py-8">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
+          <div className="mb-4 sm:mb-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h1 className="mb-2 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-4xl font-bold tracking-tight text-transparent dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
+                <h1 className="mb-1 bg-gradient-to-r from-zinc-900 via-zinc-700 to-zinc-900 bg-clip-text text-2xl font-bold tracking-tight text-transparent sm:mb-2 sm:text-4xl dark:from-zinc-50 dark:via-zinc-300 dark:to-zinc-50">
                   Reports
                 </h1>
-                <p className="text-sm font-medium text-zinc-600 dark:text-zinc-400">
+                <p className="text-xs font-medium text-zinc-600 sm:text-sm dark:text-zinc-400">
                   Generate and manage your accomplishment reports
                 </p>
               </div>
               <button
                 onClick={() => setShowGenerateModal(true)}
-                className="group rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                className="group w-full rounded-lg bg-gradient-to-r from-rose-400 to-orange-400 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 sm:w-auto sm:rounded-xl sm:px-6 sm:py-3 sm:text-base"
               >
-                <PlusIcon className="mr-2 inline size-5" />
+                <PlusIcon className="mr-1.5 inline size-4 sm:mr-2 sm:size-5" />
                 Generate Report
               </button>
             </div>
@@ -226,69 +226,66 @@ export default function ReportsPage() {
 
         {/* Reports List */}
         {reports.length === 0 ? (
-          <div className="rounded-2xl border border-zinc-200 bg-white/80 p-12 text-center shadow-xl backdrop-blur-xl dark:border-zinc-800 dark:bg-zinc-900/80">
-            <FileTextIcon className="mx-auto mb-4 size-16 text-zinc-400 dark:text-zinc-600" />
-            <h3 className="mb-2 text-xl font-bold text-zinc-900 dark:text-zinc-50">
+          <div className="rounded-xl border border-zinc-200 bg-white/80 p-6 text-center shadow-xl backdrop-blur-xl sm:rounded-2xl sm:p-12 dark:border-zinc-800 dark:bg-zinc-900/80">
+            <FileTextIcon className="mx-auto mb-3 size-12 text-zinc-400 sm:mb-4 sm:size-16 dark:text-zinc-600" />
+            <h3 className="mb-1.5 text-lg font-bold text-zinc-900 sm:mb-2 sm:text-xl dark:text-zinc-50">
               No reports yet
             </h3>
-            <p className="mb-6 text-sm text-zinc-600 dark:text-zinc-400">
+            <p className="mb-4 text-xs text-zinc-600 sm:mb-6 sm:text-sm dark:text-zinc-400">
               Generate your first weekly or monthly report
             </p>
             <button
               onClick={() => setShowGenerateModal(true)}
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-6 py-3 font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-rose-400 to-orange-400 px-4 py-2.5 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 sm:gap-2 sm:rounded-xl sm:px-6 sm:py-3 sm:text-base"
             >
-              <PlusIcon className="size-5" />
+              <PlusIcon className="size-4 sm:size-5" />
               Generate Report
             </button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4 sm:space-y-6">
             {reports.map((report) => (
               <div
                 key={report.id}
-                className="rounded-2xl border border-zinc-200 bg-white/80 p-6 shadow-xl backdrop-blur-xl transition-all hover:shadow-2xl dark:border-zinc-800 dark:bg-zinc-900/80"
+                className="rounded-xl border border-zinc-200 bg-white/80 p-4 shadow-lg backdrop-blur-xl transition-all hover:shadow-2xl sm:rounded-2xl sm:p-6 sm:shadow-xl dark:border-zinc-800 dark:bg-zinc-900/80"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <div className="mb-2 flex items-center gap-3">
-                      <FileTextIcon className="size-5 text-rose-400" />
-                      <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+                    <div className="mb-1.5 flex items-center gap-2 sm:mb-2 sm:gap-3">
+                      <FileTextIcon className="size-4 text-rose-400 sm:size-5" />
+                      <h3 className="text-base font-bold text-zinc-900 sm:text-xl dark:text-zinc-50">
                         {report.title}
                       </h3>
                     </div>
-                    <div className="mb-4 flex items-center gap-4 text-sm text-zinc-600 dark:text-zinc-400">
+                    <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-zinc-600 sm:mb-4 sm:gap-4 sm:text-sm dark:text-zinc-400">
                       <span className="inline-flex items-center gap-1">
-                        <CalendarIcon className="size-4" />
+                        <CalendarIcon className="size-3 sm:size-4" />
                         {new Date(report.start_date).toLocaleDateString()} - {new Date(report.end_date).toLocaleDateString()}
                       </span>
-                      <span className="rounded-lg bg-zinc-100 px-3 py-1 text-xs font-medium dark:bg-zinc-800">
+                      <span className="rounded-md bg-zinc-100 px-2 py-0.5 text-[10px] font-medium sm:rounded-lg sm:px-3 sm:py-1 sm:text-xs dark:bg-zinc-800">
                         {report.report_type}
                       </span>
-                      <span className="text-xs">
-                        Created {new Date(report.created_at).toLocaleDateString()}
-                      </span>
                     </div>
-                    <div className="mb-4 rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/50">
-                      <pre className="line-clamp-6 whitespace-pre-wrap text-sm text-zinc-600 dark:text-zinc-400">
+                    <div className="mb-3 rounded-lg bg-zinc-50 p-3 sm:mb-4 sm:rounded-xl sm:p-4 dark:bg-zinc-800/50">
+                      <pre className="line-clamp-4 whitespace-pre-wrap text-xs text-zinc-600 sm:line-clamp-6 sm:text-sm dark:text-zinc-400">
                         {report.content}
                       </pre>
                     </div>
                   </div>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   <button
                     onClick={() => downloadReport(report)}
-                    className="flex-1 rounded-xl bg-gradient-to-r from-rose-400 to-orange-400 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95"
+                    className="flex-1 rounded-lg bg-gradient-to-r from-rose-400 to-orange-400 px-3 py-2 text-xs font-semibold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl active:scale-95 sm:rounded-xl sm:px-4 sm:text-sm"
                   >
-                    <DownloadIcon className="mr-2 inline size-4" />
+                    <DownloadIcon className="mr-1 inline size-3 sm:mr-2 sm:size-4" />
                     Download
                   </button>
                   <button
                     onClick={() => deleteReport(report.id)}
-                    className="rounded-xl bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 transition-colors hover:bg-red-200 dark:bg-red-950/50 dark:text-red-400 dark:hover:bg-red-900/50"
+                    className="rounded-lg bg-red-100 px-3 py-2 text-xs font-semibold text-red-700 transition-colors hover:bg-red-200 sm:rounded-xl sm:px-4 sm:text-sm dark:bg-red-950/50 dark:text-red-400 dark:hover:bg-red-900/50"
                   >
-                    <Trash2Icon className="mr-2 inline size-4" />
+                    <Trash2Icon className="mr-1 inline size-3 sm:mr-2 sm:size-4" />
                     Delete
                   </button>
                 </div>
